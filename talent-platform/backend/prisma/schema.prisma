@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         String   @default("CANDIDATE")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  assessmentAttempts AssessmentAttempt[]
+  assessmentAssignments AssessmentAssignment[]
+}
+
+model Skill {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  description String?
+  active      Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  questions   Question[]
+}
+
+model ExpertiseLevel {
+  id                String     @id @default(uuid())
+  name              String     @unique
+  secondsPerQuestion Int
+  active            Boolean    @default(true)
+  questions         Question[]
+}
+
+model Question {
+  id               String         @id @default(uuid())
+  questionCode     String         @unique
+  text             String
+  skillId          String
+  expertiseLevelId String
+  questionType     String
+  difficulty       String
+  language         String
+  explanation      String?
+  active           Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  skill            Skill          @relation(fields: [skillId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  expertiseLevel   ExpertiseLevel @relation(fields: [expertiseLevelId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  options          QuestionOption[]
+  assessmentQuestions AssessmentQuestion[]
+  attemptQuestions AssessmentAttemptQuestion[]
+  candidateAnswers CandidateAnswer[]
+
+  @@index([skillId])
+  @@index([expertiseLevelId])
+}
+
+model QuestionOption {
+  id         String   @id @default(uuid())
+  questionId String
+  optionText String
+  score      Int
+  isCorrect  Boolean  @default(false)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  candidateAnswers CandidateAnswer[]
+
+  @@unique([questionId, optionText])
+  @@index([questionId])
+}
+
+model Assessment {
+  id                 String                    @id @default(uuid())
+  name               String                    @unique
+  questionCount      Int
+  active             Boolean                   @default(true)
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+  questions          AssessmentQuestion[]
+  attempts           AssessmentAttempt[]
+  assignments        AssessmentAssignment[]
+}
+
+model AssessmentAssignment {
+  id           String     @id @default(uuid())
+  userId       String
+  assessmentId String
+  status       String     @default("ASSIGNED")
+  assignedAt   DateTime   @default(now())
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([userId, assessmentId])
+  @@index([userId])
+  @@index([assessmentId])
+  @@index([status])
+}
+
+model AssessmentQuestion {
+  id           String       @id @default(uuid())
+  assessmentId String
+  questionId   String
+  position     Int
+  assessment   Assessment   @relation(fields: [assessmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  question     Question     @relation(fields: [questionId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([assessmentId, questionId])
+  @@unique([assessmentId, position])
+  @@index([assessmentId])
+  @@index([questionId])
+}
+
+model AssessmentAttempt {
+  id              String                    @id @default(uuid())
+  userId          String
+  assessmentId    String
+  startedAt       DateTime                  @default(now())
+  completedAt     DateTime?
+  score           Int                       @default(0)
+  maxScore        Int                       @default(0)
+  percentage      Float?
+  answeredCount   Int                       @default(0)
+  status          String                    @default("IN_PROGRESS")
+  user            User                      @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  assessment      Assessment                @relation(fields: [assessmentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  questions       AssessmentAttemptQuestion[]
+  answers         CandidateAnswer[]
+
+  @@index([userId])
+  @@index([assessmentId])
+  @@index([status])
+}
+
+model AssessmentAttemptQuestion {
+  id         String            @id @default(uuid())
+  attemptId  String
+  questionId String
+  position   Int
+  questionStartedAt DateTime?
+  timeSpent  Int               @default(0)
+  timedOut   Boolean           @default(false)
+  attempt    AssessmentAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  question   Question          @relation(fields: [questionId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([attemptId, questionId])
+  @@unique([attemptId, position])
+  @@index([attemptId])
+  @@index([questionId])
+}
+
+model CandidateAnswer {
+  id          String           @id @default(uuid())
+  attemptId   String
+  questionId  String
+  optionId    String
+  score       Int
+  timeSpent   Int
+  submittedAt DateTime         @default(now())
+  attempt     AssessmentAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  question    Question         @relation(fields: [questionId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  option      QuestionOption   @relation(fields: [optionId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([attemptId, questionId])
+  @@index([attemptId])
+  @@index([questionId])
+  @@index([optionId])
+}
