@@ -198,10 +198,10 @@ export function getCurrentAttempt(token: string, attemptId: string): Promise<{ d
   return request(`/attempts/${attemptId}/current`, {}, token);
 }
 
-export function submitAnswer(token: string, attemptId: string, questionId: string, optionId: string): Promise<{ data: AnswerSubmission }> {
+export function submitAnswer(token: string, attemptId: string, questionId: string, optionId?: string): Promise<{ data: AnswerSubmission }> {
   return request(`/attempts/${attemptId}/answers`, {
     method: 'POST',
-    body: JSON.stringify({ questionId, optionId })
+    body: JSON.stringify({ questionId, ...(optionId ? { optionId } : {}) })
   }, token);
 }
 

@@ -79,7 +79,7 @@ async function getNextQuestion(transaction: Prisma.TransactionClient, attemptId:
 }
 
 export async function submitAnswer(
-  prisma: PrismaClient, userId: string, attemptId: string, questionId: string, optionId: string, now = new Date()
+  prisma: PrismaClient, userId: string, attemptId: string, questionId: string, optionId?: string, now = new Date()
 ): Promise<AnswerSubmissionResult> {
   return prisma.$transaction(async (transaction) => {
     const attempt = await transaction.assessmentAttempt.findUnique({ where: { id: attemptId }, select: { id: true, userId: true, status: true, maxScore: true } });
@@ -98,9 +98,10 @@ export async function submitAnswer(
 
     const elapsedSeconds = calculateElapsedSeconds(attemptQuestion.questionStartedAt, now);
     const allowedSeconds = attemptQuestion.question.expertiseLevel.secondsPerQuestion;
-    const timedOut = now.getTime() - attemptQuestion.questionStartedAt.getTime() > allowedSeconds * 1000;
+    const timedOut = now.getTime() - attemptQuestion.questionStartedAt.getTime() >= allowedSeconds * 1000;
 
     if (!timedOut) {
+      if (!optionId) throw new AttemptQuestionError('Select an answer before proceeding.');
       const option = await transaction.questionOption.findFirst({ where: { id: optionId, questionId }, select: { id: true, score: true } });
       if (!option) throw new AttemptQuestionError('Option does not belong to this question.');
       await transaction.candidateAnswer.create({ data: { attemptId, questionId, optionId: option.id, score: option.score, timeSpent: elapsedSeconds } });
@@ -129,18 +130,6 @@ export async function submitAnswer(
       attemptId, answeredQuestionId: questionId, nextQuestion: next.question,
       nextQuestionStartedAt: next.startedAt, allowedSeconds: next.allowedSeconds, result
     };
-    return { response, timedOut };
-  }).then(({ response, timedOut }) => {
-    if (timedOut) {
-      throw new QuestionTimedOutError({
-        attemptId: response.attemptId,
-        questionId: response.answeredQuestionId,
-        nextQuestion: response.nextQuestion,
-        nextQuestionStartedAt: response.nextQuestionStartedAt,
-        allowedSeconds: response.allowedSeconds,
-        result: response.result
-      });
-    }
     return response;
   }).catch((error: unknown) => {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') throw new DuplicateAnswerError();

@@ -7,6 +7,7 @@ export function CandidateAssessmentPage({ attemptId }: { attemptId: string }) {
   const [selectedOptionId, setSelectedOptionId] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [hasTimedOut, setHasTimedOut] = useState(false);
   const [error, setError] = useState('');
   const token = localStorage.getItem('talent_token') ?? localStorage.getItem('talent_admin_token') ?? '';
 
@@ -29,10 +30,12 @@ export function CandidateAssessmentPage({ attemptId }: { attemptId: string }) {
   }, [attemptId, token]);
 
   useEffect(() => { void loadCurrent(); }, [loadCurrent]);
+  useEffect(() => { setHasTimedOut(false); }, [attempt?.question?.id]);
+  const handleTimerExpired = useCallback(() => setHasTimedOut(true), []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
-    if (!attempt?.question || !selectedOptionId || submitting) return;
+    if (!attempt?.question || (!selectedOptionId && !hasTimedOut) || submitting) return;
     setSubmitting(true);
     setError('');
     try {
@@ -67,7 +70,7 @@ export function CandidateAssessmentPage({ attemptId }: { attemptId: string }) {
 
   return <main className="assessment-page">
     <section className="assessment-panel" aria-live="polite">
-      <div className="assessment-meta"><span>Question {attempt.questionNumber} of {attempt.totalQuestions}</span><span>Time Remaining: <AssessmentTimer questionStartedAt={attempt.questionStartedAt ?? ''} allowedSeconds={attempt.allowedSeconds ?? 0} /></span></div>
+      <div className="assessment-meta"><span>Question {attempt.questionNumber} of {attempt.totalQuestions}</span><span>Time Remaining: <AssessmentTimer key={attempt.question.id} questionStartedAt={attempt.questionStartedAt ?? ''} allowedSeconds={attempt.allowedSeconds ?? 0} onDisplayExpired={handleTimerExpired} /></span></div>
       <h1>{attempt.question.text}</h1>
       {error && <p className="error">{error}</p>}
       <form onSubmit={handleSubmit}>
@@ -75,7 +78,7 @@ export function CandidateAssessmentPage({ attemptId }: { attemptId: string }) {
           <legend>Select an answer</legend>
           {attempt.question.options.map((option) => <label className="answer-option" key={option.id}><input type="radio" name="answer" value={option.id} checked={selectedOptionId === option.id} onChange={() => setSelectedOptionId(option.id)} /><span>{option.optionText}</span></label>)}
         </fieldset>
-        <button type="submit" disabled={!selectedOptionId || submitting}>{submitting ? 'Submitting...' : 'Next'}</button>
+        <button type="submit" disabled={(!selectedOptionId && !hasTimedOut) || submitting}>{submitting ? 'Submitting...' : 'Next'}</button>
       </form>
     </section>
   </main>;

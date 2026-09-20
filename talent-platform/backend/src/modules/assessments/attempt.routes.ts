@@ -8,7 +8,7 @@ import { getAssessmentResults } from './results.service';
 
 const answerSchema = z.object({
   questionId: z.string().uuid(),
-  optionId: z.string().uuid()
+  optionId: z.string().uuid().optional()
 }).strict();
 
 export function createAttemptRoutes(prisma: PrismaClient, jwtSecret: string): Router {

@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   AttemptQuestionError,
   DuplicateAnswerError,
-  QuestionTimedOutError,
   calculateElapsedSeconds,
   calculateAssessmentResult,
   submitAnswer
@@ -86,11 +85,11 @@ describe('submitAnswer', () => {
     expect(prisma.transaction.candidateAnswer.create).toHaveBeenCalled();
   });
 
-  it('rejects and records a submission after the timeout', async () => {
+  it('records a timed-out question and advances without an answer', async () => {
     const prisma = createPrismaMock();
-    const promise = submitAnswer(prisma as never, 'user-1', 'attempt-1', 'question-1', 'option-1', new Date('2026-01-01T00:00:28.001Z'));
+    const result = await submitAnswer(prisma as never, 'user-1', 'attempt-1', 'question-1', undefined, new Date('2026-01-01T00:00:28.001Z'));
 
-    await expect(promise).rejects.toBeInstanceOf(QuestionTimedOutError);
+    expect(result.nextQuestion?.id).toBe('question-2');
     expect(prisma.transaction.candidateAnswer.create).not.toHaveBeenCalled();
     expect(prisma.transaction.assessmentAttemptQuestion.update).toHaveBeenCalledWith({
       where: { id: 'snapshot-1' },

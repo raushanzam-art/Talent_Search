@@ -51,50 +51,39 @@ export async function getCurrentAttempt(
       return { attemptId, status: 'COMPLETED', questionNumber: null, totalQuestions, question: null, questionStartedAt: null, allowedSeconds: null };
     }
 
-    for (;;) {
-      const answered = await transaction.candidateAnswer.findMany({ where: { attemptId }, select: { questionId: true } });
-      const snapshot = await transaction.assessmentAttemptQuestion.findFirst({
-        where: { attemptId, timedOut: false, questionId: { notIn: answered.map((answer) => answer.questionId) } },
-        orderBy: { position: 'asc' },
-        include: { question: { select: candidateQuestionSelect } }
+    const answered = await transaction.candidateAnswer.findMany({ where: { attemptId }, select: { questionId: true } });
+    const snapshot = await transaction.assessmentAttemptQuestion.findFirst({
+      where: { attemptId, timedOut: false, questionId: { notIn: answered.map((answer) => answer.questionId) } },
+      orderBy: { position: 'asc' },
+      include: { question: { select: candidateQuestionSelect } }
+    });
+
+    if (!snapshot) {
+      await transaction.assessmentAttempt.update({
+        where: { id: attemptId },
+        data: {
+          status: 'COMPLETED',
+          completedAt: now,
+          percentage: attempt.maxScore === 0 ? 0 : (attempt.score / attempt.maxScore) * 100,
+          answeredCount: attempt.answeredCount
+        }
       });
-
-      if (!snapshot) {
-        await transaction.assessmentAttempt.update({
-          where: { id: attemptId },
-          data: {
-            status: 'COMPLETED',
-            completedAt: now,
-            percentage: attempt.maxScore === 0 ? 0 : (attempt.score / attempt.maxScore) * 100,
-            answeredCount: attempt.answeredCount
-          }
-        });
-        return { attemptId, status: 'COMPLETED', questionNumber: null, totalQuestions, question: null, questionStartedAt: null, allowedSeconds: null };
-      }
-
-      const questionStartedAt = snapshot.questionStartedAt ?? now;
-      if (!snapshot.questionStartedAt) {
-        await transaction.assessmentAttemptQuestion.update({ where: { id: snapshot.id }, data: { questionStartedAt } });
-      }
-
-      const allowedSeconds = snapshot.question.expertiseLevel.secondsPerQuestion;
-      if (now.getTime() - questionStartedAt.getTime() > allowedSeconds * 1000) {
-        await transaction.assessmentAttemptQuestion.update({
-          where: { id: snapshot.id },
-          data: { timedOut: true, timeSpent: Math.max(0, Math.floor((now.getTime() - questionStartedAt.getTime()) / 1000)) }
-        });
-        continue;
-      }
-
-      return {
-        attemptId,
-        status: 'IN_PROGRESS',
-        questionNumber: snapshot.position + 1,
-        totalQuestions,
-        question: toCandidateQuestion(snapshot.question),
-        questionStartedAt,
-        allowedSeconds
-      };
+      return { attemptId, status: 'COMPLETED', questionNumber: null, totalQuestions, question: null, questionStartedAt: null, allowedSeconds: null };
     }
+
+    const questionStartedAt = snapshot.questionStartedAt ?? now;
+    if (!snapshot.questionStartedAt) {
+      await transaction.assessmentAttemptQuestion.update({ where: { id: snapshot.id }, data: { questionStartedAt } });
+    }
+
+    return {
+      attemptId,
+      status: 'IN_PROGRESS',
+      questionNumber: snapshot.position + 1,
+      totalQuestions,
+      question: toCandidateQuestion(snapshot.question),
+      questionStartedAt,
+      allowedSeconds: snapshot.question.expertiseLevel.secondsPerQuestion
+    };
   });
 }
