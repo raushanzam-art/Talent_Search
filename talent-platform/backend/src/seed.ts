@@ -18,6 +18,7 @@ const expertiseLevels = [
   { name: 'Intermediate', secondsPerQuestion: 20 },
   { name: 'Expert', secondsPerQuestion: 12 }
 ];
+const questionTypes = ['MULTIPLE_CHOICE', 'VERBAL', 'NUMERICAL', 'SPATIAL', 'NON_VERBAL', 'READING'];
 
 async function seed(): Promise<void> {
   for (const name of skills) {
@@ -37,6 +38,9 @@ async function seed(): Promise<void> {
       },
       create: level
     });
+  }
+  for (const name of questionTypes) {
+    await prisma.questionType.upsert({ where: { name }, update: { active: true }, create: { name } });
   }
 }
 

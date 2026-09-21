@@ -1,13 +1,6 @@
 import { z } from 'zod';
 
-export const questionTypeSchema = z.enum([
-  'MULTIPLE_CHOICE',
-  'VERBAL',
-  'NUMERICAL',
-  'SPATIAL',
-  'NON_VERBAL',
-  'READING'
-]);
+export const questionTypeSchema = z.string().trim().min(1).max(100);
 
 export const difficultySchema = z.enum(['Easy', 'Medium', 'Hard']);
 

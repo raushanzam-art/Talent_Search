@@ -8,6 +8,7 @@ function prismaMock(existingCodes: string[] = []) {
   return {
     skill: { findMany: vi.fn().mockResolvedValue([{ id: 'skill-1', name: 'Verbal Reasoning' }]) },
     expertiseLevel: { findMany: vi.fn().mockResolvedValue([{ id: 'level-1', name: 'Beginner' }]) },
+    questionType: { findMany: vi.fn().mockResolvedValue([{ name: 'VERBAL' }]) },
     question: { findMany: vi.fn().mockResolvedValue(existingCodes.map((questionCode) => ({ questionCode }))) }
   } as never;
 }

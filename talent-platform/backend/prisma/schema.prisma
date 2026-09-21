@@ -38,6 +38,14 @@ model ExpertiseLevel {
   questions         Question[]
 }
 
+model QuestionType {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
 model Question {
   id               String         @id @default(uuid())
   questionCode     String         @unique

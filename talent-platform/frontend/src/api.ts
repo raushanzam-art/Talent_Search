@@ -29,6 +29,14 @@ export interface ExpertiseLevel {
   active: boolean;
 }
 
+export interface QuestionType {
+  id: string;
+  name: string;
+  description: string | null;
+  active: boolean;
+  createdAt: string;
+}
+
 export interface QuestionOption {
   id: string;
   optionText: string;
@@ -193,6 +201,10 @@ export function saveExpertiseLevel(token: string, input: Record<string, unknown>
 export function deleteExpertiseLevel(token: string, id: string): Promise<void> {
   return request(`/admin/expertise-levels/${id}`, { method: 'DELETE' }, token);
 }
+
+export function getQuestionTypes(token: string): Promise<{ data: QuestionType[] }> { return request('/admin/question-types', {}, token); }
+export function saveQuestionType(token: string, input: Record<string, unknown>, id?: string): Promise<{ data: QuestionType }> { return request(`/admin/question-types${id ? `/${id}` : ''}`, { method: id ? 'PUT' : 'POST', body: JSON.stringify(input) }, token); }
+export function deleteQuestionType(token: string, id: string): Promise<void> { return request(`/admin/question-types/${id}`, { method: 'DELETE' }, token); }
 
 export function getCurrentAttempt(token: string, attemptId: string): Promise<{ data: CurrentAttempt }> {
   return request(`/attempts/${attemptId}/current`, {}, token);

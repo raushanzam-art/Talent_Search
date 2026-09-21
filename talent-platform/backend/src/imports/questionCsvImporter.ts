@@ -3,7 +3,6 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { PrismaClient } from '@prisma/client';
 
-const allowedQuestionTypes = new Set(['MULTIPLE_CHOICE', 'VERBAL', 'NUMERICAL', 'SPATIAL', 'NON_VERBAL', 'READING']);
 const allowedDifficulties = new Set(['Easy', 'Medium', 'Hard']);
 const requiredColumns = ['questionCode', 'skill', 'level', 'type', 'difficulty', 'language', 'questionText', 'option1', 'score1', 'option2', 'score2', 'option3', 'score3', 'explanation'] as const;
 type RequiredColumn = (typeof requiredColumns)[number];
@@ -53,13 +52,15 @@ export async function validateQuestionsCsv(prisma: PrismaClient, csvContent: str
   }, {} as CsvQuestionRow));
   report.totalRows = rows.length;
 
-  const [skills, levels, existingQuestions] = await Promise.all([
+  const [skills, levels, questionTypes, existingQuestions] = await Promise.all([
     prisma.skill.findMany({ select: { id: true, name: true } }),
     prisma.expertiseLevel.findMany({ select: { id: true, name: true } }),
+    prisma.questionType.findMany({ where: { active: true }, select: { name: true } }),
     prisma.question.findMany({ select: { questionCode: true } })
   ]);
   const skillIds = new Map(skills.map((skill) => [skill.name, skill.id]));
   const levelIds = new Map(levels.map((level) => [level.name, level.id]));
+  const allowedQuestionTypes = new Set(questionTypes.map((type) => type.name));
   const seenCodes = new Set(existingQuestions.map((question) => question.questionCode));
   const validRows: ValidatedQuestion[] = [];
 

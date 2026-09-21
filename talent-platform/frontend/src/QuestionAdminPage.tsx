@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { deleteQuestion, getExpertiseLevels, getQuestions, getSkills, importQuestionCsv, Question, QuestionImportReport, saveQuestion, Skill, ExpertiseLevel } from './api';
+import { deleteQuestion, getExpertiseLevels, getQuestionTypes, getQuestions, getSkills, importQuestionCsv, Question, QuestionImportReport, QuestionType, saveQuestion, Skill, ExpertiseLevel } from './api';
 
 const emptyQuestion = {
   questionCode: '', text: '', skillId: '', expertiseLevelId: '', type: 'MULTIPLE_CHOICE', difficulty: 'Easy', language: 'en', explanation: '', active: true,
@@ -10,6 +10,7 @@ export function QuestionAdminPage({ token }: { token: string }) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [levels, setLevels] = useState<ExpertiseLevel[]>([]);
+  const [questionTypes, setQuestionTypes] = useState<QuestionType[]>([]);
   const [form, setForm] = useState(emptyQuestion);
   const [editingId, setEditingId] = useState<string>();
   const [error, setError] = useState('');
@@ -18,8 +19,8 @@ export function QuestionAdminPage({ token }: { token: string }) {
   const [importing, setImporting] = useState(false);
 
   async function load(): Promise<void> {
-    const [questionResult, skillResult, levelResult] = await Promise.all([getQuestions(token), getSkills(token), getExpertiseLevels(token)]);
-    setQuestions(questionResult.data); setSkills(skillResult.data); setLevels(levelResult.data);
+    const [questionResult, skillResult, levelResult, typeResult] = await Promise.all([getQuestions(token), getSkills(token), getExpertiseLevels(token), getQuestionTypes(token)]);
+    setQuestions(questionResult.data); setSkills(skillResult.data); setLevels(levelResult.data); setQuestionTypes(typeResult.data);
   }
   useEffect(() => { load().catch((reason: unknown) => setError(reason instanceof Error ? reason.message : 'Could not load questions.')); }, [token]);
 
@@ -88,7 +89,7 @@ export function QuestionAdminPage({ token }: { token: string }) {
       <label>Question text<textarea value={form.text} onChange={(event) => setForm({ ...form, text: event.target.value })} required /></label>
       <label>Skill<select value={form.skillId} onChange={(event) => setForm({ ...form, skillId: event.target.value })} required><option value="">Select skill</option>{skills.map((skill) => <option key={skill.id} value={skill.id}>{skill.name}</option>)}</select></label>
       <label>Expertise level<select value={form.expertiseLevelId} onChange={(event) => setForm({ ...form, expertiseLevelId: event.target.value })} required><option value="">Select level</option>{levels.map((level) => <option key={level.id} value={level.id}>{level.name}</option>)}</select></label>
-      <label>Type<select value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value })}>{['MULTIPLE_CHOICE', 'VERBAL', 'NUMERICAL', 'SPATIAL', 'NON_VERBAL', 'READING'].map((type) => <option key={type}>{type}</option>)}</select></label>
+      <label>Type<select value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value })}>{questionTypes.filter((type) => type.active || type.name === form.type).map((type) => <option key={type.id} value={type.name}>{type.name}</option>)}</select></label>
       <label>Difficulty<select value={form.difficulty} onChange={(event) => setForm({ ...form, difficulty: event.target.value })}>{['Easy', 'Medium', 'Hard'].map((difficulty) => <option key={difficulty}>{difficulty}</option>)}</select></label>
       <label>Language<input value={form.language} onChange={(event) => setForm({ ...form, language: event.target.value })} required /></label>
       {form.options.map((option, index) => <div className="option-row" key={index}><label>Option {index + 1}<input value={option.optionText} onChange={(event) => updateOption(index, 'optionText', event.target.value)} required /></label><label>Score<input type="number" min="1" max="3" value={option.score} onChange={(event) => updateOption(index, 'score', event.target.value)} required /></label><label>Correct<input type="checkbox" checked={option.isCorrect} onChange={(event) => updateOption(index, 'isCorrect', event.target.checked)} /></label></div>)}

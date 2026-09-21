@@ -106,9 +106,10 @@ function questionData(input: QuestionInput): Prisma.QuestionCreateInput {
 }
 
 async function ensureReferences(prisma: PrismaDatabase, input: QuestionInput): Promise<void> {
-  const [skill, expertiseLevel] = await Promise.all([
+  const [skill, expertiseLevel, questionType] = await Promise.all([
     prisma.skill.findUnique({ where: { id: input.skillId }, select: { id: true } }),
-    prisma.expertiseLevel.findUnique({ where: { id: input.expertiseLevelId }, select: { id: true } })
+    prisma.expertiseLevel.findUnique({ where: { id: input.expertiseLevelId }, select: { id: true } }),
+    prisma.questionType.findFirst({ where: { name: input.type, active: true }, select: { id: true } })
   ]);
 
   if (!skill) {
@@ -116,6 +117,9 @@ async function ensureReferences(prisma: PrismaDatabase, input: QuestionInput): P
   }
   if (!expertiseLevel) {
     throw new QuestionReferenceNotFoundError('Expertise level', input.expertiseLevelId);
+  }
+  if (!questionType) {
+    throw new QuestionReferenceNotFoundError('Question type', input.type);
   }
 }
 

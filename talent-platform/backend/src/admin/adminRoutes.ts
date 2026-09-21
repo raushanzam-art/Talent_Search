@@ -16,6 +16,11 @@ const expertiseLevelSchema = z.object({
   secondsPerQuestion: z.number().int().positive(),
   active: z.boolean().default(true)
 }).strict();
+const questionTypeSchema = z.object({
+  name: z.string().trim().min(1).max(100),
+  description: z.string().trim().max(1000).optional(),
+  active: z.boolean().default(true)
+}).strict();
 const assessmentSchema = z.object({
   name: z.string().trim().min(1).max(200),
   questionIds: z.array(z.string().uuid()).min(1),
@@ -147,6 +152,37 @@ export function createAdminRoutes(prisma: PrismaClient, jwtSecret: string): Rout
     } catch (error: unknown) {
       next(error);
     }
+  });
+
+  router.get('/question-types', ...adminOnly, async (_request, response, next) => {
+    try { response.json({ data: await prisma.questionType.findMany({ orderBy: { name: 'asc' } }) }); } catch (error: unknown) { next(error); }
+  });
+  router.post('/question-types', ...adminOnly, async (request, response, next) => {
+    try { response.status(201).json({ data: await prisma.questionType.create({ data: questionTypeSchema.parse(request.body) }) }); } catch (error: unknown) { next(error); }
+  });
+  router.put('/question-types/:id', ...adminOnly, async (request, response, next) => {
+    try {
+      const { id } = idSchema.parse(request.params);
+      const input = questionTypeSchema.parse(request.body);
+      const existing = await prisma.questionType.findUnique({ where: { id } });
+      if (!existing) { response.status(404).json({ error: 'Question type not found.' }); return; }
+      const questionType = await prisma.$transaction(async (transaction) => {
+        if (existing.name !== input.name) await transaction.question.updateMany({ where: { questionType: existing.name }, data: { questionType: input.name } });
+        return transaction.questionType.update({ where: { id }, data: input });
+      });
+      response.json({ data: questionType });
+    } catch (error: unknown) { next(error); }
+  });
+  router.delete('/question-types/:id', ...adminOnly, async (request, response, next) => {
+    try {
+      const { id } = idSchema.parse(request.params);
+      const questionType = await prisma.questionType.findUnique({ where: { id } });
+      if (!questionType) { response.status(404).json({ error: 'Question type not found.' }); return; }
+      const questionCount = await prisma.question.count({ where: { questionType: questionType.name } });
+      if (questionCount > 0) { response.status(409).json({ error: 'Question types in use cannot be deleted. Deactivate it instead.' }); return; }
+      await prisma.questionType.delete({ where: { id } });
+      response.status(204).send();
+    } catch (error: unknown) { next(error); }
   });
 
   return router;
