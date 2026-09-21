@@ -6,7 +6,7 @@ import { PrismaClient } from '@prisma/client';
 const allowedDifficulties = new Set(['Easy', 'Medium', 'Hard']);
 const requiredColumns = ['questionCode', 'skill', 'level', 'type', 'difficulty', 'language', 'questionText', 'option1', 'score1', 'option2', 'score2', 'option3', 'score3', 'explanation'] as const;
 type RequiredColumn = (typeof requiredColumns)[number];
-type CsvQuestionRow = Record<RequiredColumn, string>;
+type CsvQuestionRow = Record<RequiredColumn, string> & { categoryId: string };
 
 export interface ImportError { row: number; messages: string[]; }
 export interface QuestionImportPreview { row: number; questionCode: string; skill: string; level: string; type: string; difficulty: string; questionText: string; valid: boolean; errors: string[]; }
@@ -29,6 +29,7 @@ interface ValidatedQuestion {
   difficulty: string;
   language: string;
   explanation: string;
+  categoryId?: string;
   options: Array<{ optionText: string; score: number; isCorrect: boolean }>;
 }
 
@@ -49,19 +50,21 @@ export async function validateQuestionsCsv(prisma: PrismaClient, csvContent: str
   const rows = parsedRows.map((parsedRow) => requiredColumns.reduce((row, column) => {
     row[column] = parsedRow[column] ?? '';
     return row;
-  }, {} as CsvQuestionRow));
+  }, { categoryId: parsedRow.categoryId ?? '' } as CsvQuestionRow));
   report.totalRows = rows.length;
 
-  const [skills, levels, questionTypes, existingQuestions] = await Promise.all([
+  const [skills, levels, questionTypes, categories, existingQuestions] = await Promise.all([
     prisma.skill.findMany({ select: { id: true, name: true } }),
     prisma.expertiseLevel.findMany({ select: { id: true, name: true } }),
     prisma.questionType.findMany({ where: { active: true }, select: { name: true } }),
+    prisma.questionCategory.findMany({ where: { active: true }, select: { id: true } }),
     prisma.question.findMany({ select: { questionCode: true } })
   ]);
   const skillIds = new Map(skills.map((skill) => [skill.name, skill.id]));
   const levelIds = new Map(levels.map((level) => [level.name, level.id]));
   const allowedQuestionTypes = new Set(questionTypes.map((type) => type.name));
-  const seenCodes = new Set(existingQuestions.map((question) => question.questionCode));
+  const categoryIds = new Set(categories.map((category) => category.id));
+  const seenCodes = new Set<string>();
   const validRows: ValidatedQuestion[] = [];
 
   rows.forEach((row, index) => {
@@ -76,6 +79,7 @@ export async function validateQuestionsCsv(prisma: PrismaClient, csvContent: str
     if (!skillIds.has(row.skill) && row.skill) errors.push(`Skill does not exist: ${row.skill}`);
     if (!levelIds.has(row.level) && row.level) errors.push(`Expertise level does not exist: ${row.level}`);
     if (!allowedQuestionTypes.has(row.type)) errors.push(`Invalid question type: ${row.type}`);
+    if (row.categoryId && !categoryIds.has(row.categoryId)) errors.push(`Question category does not exist or is inactive: ${row.categoryId}`);
     if (!allowedDifficulties.has(row.difficulty)) errors.push(`Invalid difficulty: ${row.difficulty}`);
 
     const scores = [parseScore(row.score1), parseScore(row.score2), parseScore(row.score3)];
@@ -96,6 +100,7 @@ export async function validateQuestionsCsv(prisma: PrismaClient, csvContent: str
         difficulty: row.difficulty,
         language: row.language,
         explanation: row.explanation,
+        ...(row.categoryId ? { categoryId: row.categoryId } : {}),
         options: [row.option1, row.option2, row.option3].map((optionText, optionIndex) => ({ optionText, score: scores[optionIndex]!, isCorrect: scores[optionIndex] === 3 }))
       });
     } else {
@@ -111,8 +116,9 @@ export async function validateQuestionsCsv(prisma: PrismaClient, csvContent: str
 export async function importValidatedQuestions(prisma: PrismaClient, validation: ValidatedQuestionCsv): Promise<QuestionImportReport> {
   for (const row of validation.rows) {
     try {
-      await prisma.question.create({
-        data: {
+      await prisma.question.upsert({
+        where: { questionCode: row.questionCode },
+        create: {
           questionCode: row.questionCode,
           text: row.text,
           skillId: row.skillId,
@@ -121,7 +127,14 @@ export async function importValidatedQuestions(prisma: PrismaClient, validation:
           difficulty: row.difficulty,
           language: row.language,
           explanation: row.explanation,
+          ...(row.categoryId ? { categoryId: row.categoryId } : {}),
           options: { create: row.options }
+        },
+        update: {
+          text: row.text, skillId: row.skillId, expertiseLevelId: row.expertiseLevelId, questionType: row.questionType,
+          difficulty: row.difficulty, language: row.language, explanation: row.explanation,
+          ...(row.categoryId ? { categoryId: row.categoryId } : {}),
+          options: { deleteMany: {}, create: row.options }
         }
       });
       validation.report.importedRows += 1;

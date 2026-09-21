@@ -19,6 +19,13 @@ const expertiseLevels = [
   { name: 'Expert', secondsPerQuestion: 12 }
 ];
 const questionTypes = ['MULTIPLE_CHOICE', 'VERBAL', 'NUMERICAL', 'SPATIAL', 'NON_VERBAL', 'READING'];
+const questionCategories = [
+  { id: 'primary', name: 'Primary', description: 'Primary-level questions', displayOrder: 1 },
+  { id: 'secondary', name: 'Secondary', description: 'Secondary-level questions', displayOrder: 2 },
+  { id: 'intermediate', name: 'Intermediate', description: 'Intermediate-level questions', displayOrder: 3 },
+  { id: 'professional', name: 'Professional', description: 'Professional-level questions', displayOrder: 4 },
+  { id: 'higher_level', name: 'Higher Level', description: 'Higher-level questions', displayOrder: 5 }
+];
 
 async function seed(): Promise<void> {
   for (const name of skills) {
@@ -41,6 +48,9 @@ async function seed(): Promise<void> {
   }
   for (const name of questionTypes) {
     await prisma.questionType.upsert({ where: { name }, update: { active: true }, create: { name } });
+  }
+  for (const category of questionCategories) {
+    await prisma.questionCategory.upsert({ where: { id: category.id }, update: { active: true }, create: category });
   }
 }
 

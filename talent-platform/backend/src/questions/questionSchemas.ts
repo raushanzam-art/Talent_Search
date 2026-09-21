@@ -15,6 +15,7 @@ export const questionInputSchema = z.object({
   text: z.string().trim().min(1),
   skillId: z.string().uuid(),
   expertiseLevelId: z.string().uuid(),
+  categoryId: z.string().trim().min(1).max(100).optional(),
   type: questionTypeSchema,
   difficulty: difficultySchema,
   language: z.string().trim().min(2),

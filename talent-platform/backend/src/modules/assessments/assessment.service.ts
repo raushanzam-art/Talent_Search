@@ -36,6 +36,7 @@ const candidateQuestionSelect = {
   createdAt: true,
   updatedAt: true,
   skill: { select: { id: true, name: true } },
+  category: { select: { id: true, name: true, description: true, displayOrder: true, active: true } },
   expertiseLevel: { select: { id: true, name: true, secondsPerQuestion: true } },
   options: {
     select: { id: true, optionText: true },
@@ -55,6 +56,7 @@ function toCandidateQuestion(question: CandidateQuestionRecord): CandidateQuesti
     skill: question.skill,
     expertiseLevel: question.expertiseLevel,
     type: question.questionType,
+    category: question.category,
     difficulty: question.difficulty,
     language: question.language,
     ...(question.explanation === null ? {} : { explanation: question.explanation }),

@@ -46,12 +46,26 @@ model QuestionType {
   createdAt   DateTime @default(now())
 }
 
+model QuestionCategory {
+  id           String     @id @default(uuid())
+  name         String     @unique
+  description  String?
+  displayOrder Int        @default(0)
+  active       Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  questions    Question[]
+
+  @@index([active, displayOrder])
+}
+
 model Question {
   id               String         @id @default(uuid())
   questionCode     String         @unique
   text             String
   skillId          String
   expertiseLevelId String
+  categoryId       String?
   questionType     String
   difficulty       String
   language         String
@@ -61,6 +75,7 @@ model Question {
   updatedAt        DateTime       @updatedAt
   skill            Skill          @relation(fields: [skillId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   expertiseLevel   ExpertiseLevel @relation(fields: [expertiseLevelId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  category         QuestionCategory? @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   options          QuestionOption[]
   assessmentQuestions AssessmentQuestion[]
   attemptQuestions AssessmentAttemptQuestion[]
@@ -68,6 +83,7 @@ model Question {
 
   @@index([skillId])
   @@index([expertiseLevelId])
+  @@index([categoryId])
 }
 
 model QuestionOption {

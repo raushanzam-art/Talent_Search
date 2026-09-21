@@ -9,6 +9,7 @@ function prismaMock(existingCodes: string[] = []) {
     skill: { findMany: vi.fn().mockResolvedValue([{ id: 'skill-1', name: 'Verbal Reasoning' }]) },
     expertiseLevel: { findMany: vi.fn().mockResolvedValue([{ id: 'level-1', name: 'Beginner' }]) },
     questionType: { findMany: vi.fn().mockResolvedValue([{ name: 'VERBAL' }]) },
+    questionCategory: { findMany: vi.fn().mockResolvedValue([{ id: 'primary' }]) },
     question: { findMany: vi.fn().mockResolvedValue(existingCodes.map((questionCode) => ({ questionCode }))) }
   } as never;
 }
@@ -20,9 +21,9 @@ describe('question CSV validation', () => {
     expect(result.rows).toHaveLength(1);
   });
 
-  it('detects duplicate question codes already in the database and CSV', async () => {
+  it('allows an existing question to be updated but detects duplicate rows in the CSV', async () => {
     const result = await validateQuestionsCsv(prismaMock(['CSV-001']), `${header}\n${row('CSV-001')}\n${row('CSV-001')}`);
-    expect(result.report).toMatchObject({ totalRows: 2, validRows: 0, invalidRows: 2, duplicateRows: 2 });
+    expect(result.report).toMatchObject({ totalRows: 2, validRows: 1, invalidRows: 1, duplicateRows: 1 });
     expect(result.report.errors.every((error) => error.messages[0].includes('Duplicate question code'))).toBe(true);
   });
 });

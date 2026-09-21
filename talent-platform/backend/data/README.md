@@ -10,6 +10,7 @@ The `questions.csv` file is an administrator-editable question template. It is i
 | `skill` | Skill name assigned to the question. Use an existing skill name, such as `Verbal Reasoning`. |
 | `level` | Expertise level assigned to the question: `Beginner`, `Intermediate`, or `Expert`. |
 | `type` | Question type: `MULTIPLE_CHOICE`, `VERBAL`, `NUMERICAL`, `SPATIAL`, `NON_VERBAL`, or `READING`. |
+| `categoryId` | Optional stable question-category ID, such as `primary`. It must already exist and be active. Blank values preserve an existing question's category on import. |
 | `difficulty` | Human-readable difficulty, such as `Easy`, `Medium`, or `Hard`. |
 | `language` | Language code for the question, such as `en`. |
 | `questionText` | The question shown to the candidate. |

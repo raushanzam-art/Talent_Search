@@ -36,6 +36,14 @@ export interface QuestionType {
   active: boolean;
   createdAt: string;
 }
+export interface QuestionCategory {
+  id: string;
+  name: string;
+  description: string | null;
+  displayOrder: number;
+  active: boolean;
+  _count?: { questions: number };
+}
 
 export interface QuestionOption {
   id: string;
@@ -50,6 +58,7 @@ export interface Question {
   text: string;
   skill: { id: string; name: string };
   expertiseLevel: { id: string; name: string; secondsPerQuestion: number };
+  category: QuestionCategory | null;
   type: string;
   difficulty: string;
   language: string;
@@ -205,6 +214,9 @@ export function deleteExpertiseLevel(token: string, id: string): Promise<void> {
 export function getQuestionTypes(token: string): Promise<{ data: QuestionType[] }> { return request('/admin/question-types', {}, token); }
 export function saveQuestionType(token: string, input: Record<string, unknown>, id?: string): Promise<{ data: QuestionType }> { return request(`/admin/question-types${id ? `/${id}` : ''}`, { method: id ? 'PUT' : 'POST', body: JSON.stringify(input) }, token); }
 export function deleteQuestionType(token: string, id: string): Promise<void> { return request(`/admin/question-types/${id}`, { method: 'DELETE' }, token); }
+export function getQuestionCategories(token: string): Promise<{ data: QuestionCategory[] }> { return request('/admin/question-categories', {}, token); }
+export function saveQuestionCategory(token: string, input: Record<string, unknown>, id?: string): Promise<{ data: QuestionCategory }> { return request(`/admin/question-categories${id ? `/${id}` : ''}`, { method: id ? 'PUT' : 'POST', body: JSON.stringify(input) }, token); }
+export function deleteQuestionCategory(token: string, id: string, replacementCategoryId?: string): Promise<void> { return request(`/admin/question-categories/${id}`, { method: 'DELETE', body: JSON.stringify(replacementCategoryId ? { replacementCategoryId } : {}) }, token); }
 
 export function getCurrentAttempt(token: string, attemptId: string): Promise<{ data: CurrentAttempt }> {
   return request(`/attempts/${attemptId}/current`, {}, token);

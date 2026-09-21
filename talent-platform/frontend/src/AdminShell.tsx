@@ -75,6 +75,7 @@ export function AdminShell({ children }: AdminShellProps) {
         <a href="/admin/skills">Skills</a>
         <a href="/admin/expertise-levels">Expertise levels</a>
         <a href="/admin/question-types">Question types</a>
+        <a href="/admin/question-categories">Question categories</a>
         <a href="/admin/assessments">Assessments</a>
       </nav>
       {children(token)}

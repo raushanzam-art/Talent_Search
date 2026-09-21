@@ -21,6 +21,13 @@ const questionTypeSchema = z.object({
   description: z.string().trim().max(1000).optional(),
   active: z.boolean().default(true)
 }).strict();
+const questionCategorySchema = z.object({
+  name: z.string().trim().min(1).max(150),
+  description: z.string().trim().max(1000).optional(),
+  displayOrder: z.number().int().min(0),
+  active: z.boolean().default(true)
+}).strict();
+const categoryRemovalSchema = z.object({ replacementCategoryId: z.string().trim().min(1).max(100).optional() }).strict();
 const assessmentSchema = z.object({
   name: z.string().trim().min(1).max(200),
   questionIds: z.array(z.string().uuid()).min(1),
@@ -181,6 +188,31 @@ export function createAdminRoutes(prisma: PrismaClient, jwtSecret: string): Rout
       const questionCount = await prisma.question.count({ where: { questionType: questionType.name } });
       if (questionCount > 0) { response.status(409).json({ error: 'Question types in use cannot be deleted. Deactivate it instead.' }); return; }
       await prisma.questionType.delete({ where: { id } });
+      response.status(204).send();
+    } catch (error: unknown) { next(error); }
+  });
+
+  router.get('/question-categories', ...adminOnly, async (_request, response, next) => {
+    try { response.json({ data: await prisma.questionCategory.findMany({ orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }], include: { _count: { select: { questions: true } } } }) }); } catch (error: unknown) { next(error); }
+  });
+  router.post('/question-categories', ...adminOnly, async (request, response, next) => {
+    try { response.status(201).json({ data: await prisma.questionCategory.create({ data: questionCategorySchema.parse(request.body) }) }); } catch (error: unknown) { next(error); }
+  });
+  router.put('/question-categories/:id', ...adminOnly, async (request, response, next) => {
+    try { const { id } = idSchema.parse(request.params); response.json({ data: await prisma.questionCategory.update({ where: { id }, data: questionCategorySchema.parse(request.body) }) }); } catch (error: unknown) { next(error); }
+  });
+  router.delete('/question-categories/:id', ...adminOnly, async (request, response, next) => {
+    try {
+      const { id } = idSchema.parse(request.params); const { replacementCategoryId } = categoryRemovalSchema.parse(request.body ?? {});
+      const category = await prisma.questionCategory.findUnique({ where: { id } });
+      if (!category) { response.status(404).json({ error: 'Question category not found.' }); return; }
+      const questionCount = await prisma.question.count({ where: { categoryId: id } });
+      if (questionCount && !replacementCategoryId) { response.status(409).json({ error: `This category is assigned to ${questionCount} question${questionCount === 1 ? '' : 's'}. Choose a replacement category before removing it.`, details: { questionCount } }); return; }
+      if (replacementCategoryId) {
+        const replacement = await prisma.questionCategory.findFirst({ where: { id: replacementCategoryId, active: true } });
+        if (!replacement || replacement.id === id) { response.status(400).json({ error: 'Choose a different active replacement category.' }); return; }
+      }
+      await prisma.$transaction(async (transaction) => { if (replacementCategoryId) await transaction.question.updateMany({ where: { categoryId: id }, data: { categoryId: replacementCategoryId } }); await transaction.questionCategory.delete({ where: { id } }); });
       response.status(204).send();
     } catch (error: unknown) { next(error); }
   });

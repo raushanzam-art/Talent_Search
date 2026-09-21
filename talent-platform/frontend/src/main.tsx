@@ -9,6 +9,7 @@ import { AdminAssessmentPage } from './AdminAssessmentPage';
 import { CandidateLoginPage } from './CandidateLoginPage';
 import { CandidateDashboardPage } from './CandidateDashboardPage';
 import { QuestionTypeAdminPage } from './QuestionTypeAdminPage';
+import { QuestionCategoryAdminPage } from './QuestionCategoryAdminPage';
 import './styles.css';
 
 function App() {
@@ -25,6 +26,8 @@ function App() {
       ? <ResourceAdminPage kind="expertise-levels" token={token} />
       : path === '/admin/question-types'
         ? <QuestionTypeAdminPage token={token} />
+        : path === '/admin/question-categories'
+          ? <QuestionCategoryAdminPage token={token} />
       : path === '/admin/assessments'
         ? <AdminAssessmentPage token={token} />
       : <QuestionAdminPage token={token} />}</AdminShell>;

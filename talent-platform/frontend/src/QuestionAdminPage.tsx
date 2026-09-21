@@ -1,8 +1,8 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { deleteQuestion, getExpertiseLevels, getQuestionTypes, getQuestions, getSkills, importQuestionCsv, Question, QuestionImportReport, QuestionType, saveQuestion, Skill, ExpertiseLevel } from './api';
+import { deleteQuestion, getExpertiseLevels, getQuestionCategories, getQuestionTypes, getQuestions, getSkills, importQuestionCsv, Question, QuestionCategory, QuestionImportReport, QuestionType, saveQuestion, Skill, ExpertiseLevel } from './api';
 
 const emptyQuestion = {
-  questionCode: '', text: '', skillId: '', expertiseLevelId: '', type: 'MULTIPLE_CHOICE', difficulty: 'Easy', language: 'en', explanation: '', active: true,
+  questionCode: '', text: '', skillId: '', expertiseLevelId: '', categoryId: '', type: 'MULTIPLE_CHOICE', difficulty: 'Easy', language: 'en', explanation: '', active: true,
   options: [{ optionText: '', score: 1, isCorrect: false }, { optionText: '', score: 2, isCorrect: false }, { optionText: '', score: 3, isCorrect: true }]
 };
 
@@ -11,6 +11,8 @@ export function QuestionAdminPage({ token }: { token: string }) {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [levels, setLevels] = useState<ExpertiseLevel[]>([]);
   const [questionTypes, setQuestionTypes] = useState<QuestionType[]>([]);
+  const [categories, setCategories] = useState<QuestionCategory[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState('');
   const [form, setForm] = useState(emptyQuestion);
   const [editingId, setEditingId] = useState<string>();
   const [error, setError] = useState('');
@@ -19,8 +21,8 @@ export function QuestionAdminPage({ token }: { token: string }) {
   const [importing, setImporting] = useState(false);
 
   async function load(): Promise<void> {
-    const [questionResult, skillResult, levelResult, typeResult] = await Promise.all([getQuestions(token), getSkills(token), getExpertiseLevels(token), getQuestionTypes(token)]);
-    setQuestions(questionResult.data); setSkills(skillResult.data); setLevels(levelResult.data); setQuestionTypes(typeResult.data);
+    const [questionResult, skillResult, levelResult, typeResult, categoryResult] = await Promise.all([getQuestions(token), getSkills(token), getExpertiseLevels(token), getQuestionTypes(token), getQuestionCategories(token)]);
+    setQuestions(questionResult.data); setSkills(skillResult.data); setLevels(levelResult.data); setQuestionTypes(typeResult.data); setCategories(categoryResult.data);
   }
   useEffect(() => { load().catch((reason: unknown) => setError(reason instanceof Error ? reason.message : 'Could not load questions.')); }, [token]);
 
@@ -30,7 +32,7 @@ export function QuestionAdminPage({ token }: { token: string }) {
 
   function edit(question: Question): void {
     setEditingId(question.id);
-    setForm({ questionCode: question.questionCode, text: question.text, skillId: question.skill.id, expertiseLevelId: question.expertiseLevel.id, type: question.type, difficulty: question.difficulty, language: question.language, explanation: question.explanation ?? '', active: question.active, options: question.options.map((option) => ({ optionText: option.optionText, score: option.score ?? 1, isCorrect: option.isCorrect ?? false })) });
+    setForm({ questionCode: question.questionCode, text: question.text, skillId: question.skill.id, expertiseLevelId: question.expertiseLevel.id, categoryId: question.category?.id ?? '', type: question.type, difficulty: question.difficulty, language: question.language, explanation: question.explanation ?? '', active: question.active, options: question.options.map((option) => ({ optionText: option.optionText, score: option.score ?? 1, isCorrect: option.isCorrect ?? false })) });
   }
 
   async function submit(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -62,6 +64,7 @@ export function QuestionAdminPage({ token }: { token: string }) {
         text: question.text,
         skillId: question.skill.id,
         expertiseLevelId: question.expertiseLevel.id,
+        categoryId: question.category?.id,
         type: question.type,
         difficulty: question.difficulty,
         language: question.language,
@@ -89,6 +92,7 @@ export function QuestionAdminPage({ token }: { token: string }) {
       <label>Question text<textarea value={form.text} onChange={(event) => setForm({ ...form, text: event.target.value })} required /></label>
       <label>Skill<select value={form.skillId} onChange={(event) => setForm({ ...form, skillId: event.target.value })} required><option value="">Select skill</option>{skills.map((skill) => <option key={skill.id} value={skill.id}>{skill.name}</option>)}</select></label>
       <label>Expertise level<select value={form.expertiseLevelId} onChange={(event) => setForm({ ...form, expertiseLevelId: event.target.value })} required><option value="">Select level</option>{levels.map((level) => <option key={level.id} value={level.id}>{level.name}</option>)}</select></label>
+      <label>Question category<select value={form.categoryId} onChange={(event) => setForm({ ...form, categoryId: event.target.value })}><option value="">Unassigned</option>{categories.filter((category) => category.active || category.id === form.categoryId).map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
       <label>Type<select value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value })}>{questionTypes.filter((type) => type.active || type.name === form.type).map((type) => <option key={type.id} value={type.name}>{type.name}</option>)}</select></label>
       <label>Difficulty<select value={form.difficulty} onChange={(event) => setForm({ ...form, difficulty: event.target.value })}>{['Easy', 'Medium', 'Hard'].map((difficulty) => <option key={difficulty}>{difficulty}</option>)}</select></label>
       <label>Language<input value={form.language} onChange={(event) => setForm({ ...form, language: event.target.value })} required /></label>
@@ -97,6 +101,7 @@ export function QuestionAdminPage({ token }: { token: string }) {
       <label className="checkbox-label"><input type="checkbox" checked={form.active} onChange={(event) => setForm({ ...form, active: event.target.checked })} /> Active</label>
       <div><button type="submit">{editingId ? 'Save changes' : 'Create question'}</button>{editingId && <button type="button" className="secondary" onClick={() => { setForm(emptyQuestion); setEditingId(undefined); }}>Cancel</button>}</div>
     </form>
-    <div className="table-wrap"><table><thead><tr><th>Code</th><th>Question</th><th>Skill</th><th>Level</th><th>Type</th><th>Difficulty</th><th>Active</th><th>Actions</th></tr></thead><tbody>{questions.map((question) => <tr key={question.id}><td>{question.questionCode}</td><td>{question.text}</td><td>{question.skill.name}</td><td>{question.expertiseLevel.name}</td><td>{question.type}</td><td>{question.difficulty}</td><td>{question.active ? 'Yes' : 'No'}</td><td><button type="button" onClick={() => edit(question)}>Edit</button> <button type="button" onClick={() => toggleActive(question)}>{question.active ? 'Deactivate' : 'Activate'}</button> <button type="button" className="danger" onClick={() => remove(question.id)}>Delete</button></td></tr>)}</tbody></table></div>
+    <label>Filter by category<select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}><option value="">All categories</option><option value="unassigned">Unassigned</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
+    <div className="table-wrap"><table><thead><tr><th>Code</th><th>Question</th><th>Type</th><th>Category</th><th>Subject</th><th>Year group</th><th>Difficulty</th><th>Status</th><th>Actions</th></tr></thead><tbody>{questions.filter((question) => !categoryFilter || (categoryFilter === 'unassigned' ? !question.category : question.category?.id === categoryFilter)).map((question) => <tr key={question.id}><td>{question.questionCode}</td><td>{question.text}</td><td>{question.type}</td><td>{question.category?.name ?? 'Unassigned'}</td><td>{question.skill.name}</td><td>{question.expertiseLevel.name}</td><td>{question.difficulty}</td><td>{question.active ? 'Active' : 'Inactive'}</td><td><button type="button" onClick={() => edit(question)}>Edit</button> <button type="button" onClick={() => toggleActive(question)}>{question.active ? 'Deactivate' : 'Activate'}</button> <button type="button" className="danger" onClick={() => remove(question.id)}>Delete</button></td></tr>)}</tbody></table></div>
   </section>;
 }

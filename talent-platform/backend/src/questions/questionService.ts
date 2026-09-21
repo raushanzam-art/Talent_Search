@@ -25,6 +25,7 @@ export class QuestionReferenceNotFoundError extends Error {
 const questionInclude = {
   skill: { select: { id: true, name: true } },
   expertiseLevel: { select: { id: true, name: true, secondsPerQuestion: true } },
+  category: { select: { id: true, name: true, description: true, displayOrder: true, active: true } },
   options: {
     select: {
       id: true,
@@ -48,6 +49,7 @@ export interface CandidateQuestion {
   text: string;
   skill: { id: string; name: string };
   expertiseLevel: { id: string; name: string; secondsPerQuestion: number };
+  category: { id: string; name: string; description: string | null; displayOrder: number; active: boolean } | null;
   type: string;
   difficulty: string;
   language: string;
@@ -69,6 +71,7 @@ function toAdminQuestion(question: QuestionWithRelations): AdminQuestion {
     text: question.text,
     skill: question.skill,
     expertiseLevel: question.expertiseLevel,
+    category: question.category,
     type: question.questionType,
     difficulty: question.difficulty,
     language: question.language,
@@ -99,6 +102,7 @@ function questionData(input: QuestionInput): Prisma.QuestionCreateInput {
     active: input.active,
     skill: { connect: { id: input.skillId } },
     expertiseLevel: { connect: { id: input.expertiseLevelId } },
+    ...(input.categoryId ? { category: { connect: { id: input.categoryId } } } : {}),
     options: {
       create: input.options
     }
@@ -106,10 +110,11 @@ function questionData(input: QuestionInput): Prisma.QuestionCreateInput {
 }
 
 async function ensureReferences(prisma: PrismaDatabase, input: QuestionInput): Promise<void> {
-  const [skill, expertiseLevel, questionType] = await Promise.all([
+  const [skill, expertiseLevel, questionType, category] = await Promise.all([
     prisma.skill.findUnique({ where: { id: input.skillId }, select: { id: true } }),
     prisma.expertiseLevel.findUnique({ where: { id: input.expertiseLevelId }, select: { id: true } }),
-    prisma.questionType.findFirst({ where: { name: input.type, active: true }, select: { id: true } })
+    prisma.questionType.findFirst({ where: { name: input.type, active: true }, select: { id: true } }),
+    input.categoryId ? prisma.questionCategory.findFirst({ where: { id: input.categoryId, active: true }, select: { id: true } }) : Promise.resolve(null)
   ]);
 
   if (!skill) {
@@ -120,6 +125,9 @@ async function ensureReferences(prisma: PrismaDatabase, input: QuestionInput): P
   }
   if (!questionType) {
     throw new QuestionReferenceNotFoundError('Question type', input.type);
+  }
+  if (input.categoryId && !category) {
+    throw new QuestionReferenceNotFoundError('Question category', input.categoryId);
   }
 }
 
