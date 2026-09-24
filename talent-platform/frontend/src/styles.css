@@ -30,6 +30,21 @@ textarea { min-height: 5rem; resize: vertical; }
 .option-row { display: grid; grid-column: 1 / -1; grid-template-columns: 1fr 7rem 5rem; gap: 1rem; align-items: end; }
 .checkbox-label { display: flex; grid-template-columns: auto 1fr; align-items: center; gap: 0.5rem; }
 .checkbox-label input, .option-row input[type='checkbox'] { width: auto; }
+.filter-bar { display: grid; gap: 1rem; }
+.filter-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 1rem; }
+.filter-controls label { flex: 1 1 12rem; min-width: 10rem; }
+.filter-controls select[multiple] { min-height: 6rem; }
+.filter-controls > button { flex: 0 0 auto; }
+.active-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; font-size: 0.9rem; }
+.filter-chip { display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 999px; padding: 0.3rem 0.75rem; background: #d8e7d4; font-weight: 700; }
+.filter-chip button { border: 0; border-radius: 50%; width: 1.15rem; height: 1.15rem; line-height: 1; padding: 0; background: transparent; color: #18332f; cursor: pointer; font-weight: 700; }
+.empty-state { text-align: center; color: #5d625b; font-weight: 700; padding: 1.5rem; }
+@media (max-width: 720px) { .filter-controls { flex-direction: column; align-items: stretch; } .filter-controls > button { align-self: flex-start; } }
+.question-picker { display: grid; gap: 0.4rem; max-height: 18rem; overflow-y: auto; border: 1px solid #aaa397; border-radius: 4px; padding: 0.6rem; background: white; }
+.question-picker-row { display: flex !important; flex-direction: row; align-items: flex-start; gap: 0.6rem; font-weight: 400; }
+.question-picker-row input { width: auto; margin-top: 0.2rem; }
+.question-picker-row em { color: #5d625b; font-style: normal; font-size: 0.85rem; }
+.question-picker .empty-state { padding: 0.5rem; }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; background: white; }
 th, td { border-bottom: 1px solid #d8d3c8; padding: 0.75rem; text-align: left; vertical-align: top; }

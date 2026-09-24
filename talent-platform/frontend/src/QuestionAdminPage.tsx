@@ -12,7 +12,9 @@ export function QuestionAdminPage({ token }: { token: string }) {
   const [levels, setLevels] = useState<ExpertiseLevel[]>([]);
   const [questionTypes, setQuestionTypes] = useState<QuestionType[]>([]);
   const [categories, setCategories] = useState<QuestionCategory[]>([]);
-  const [categoryFilter, setCategoryFilter] = useState('');
+  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
+  const [typeFilters, setTypeFilters] = useState<string[]>([]);
+  const [levelFilters, setLevelFilters] = useState<string[]>([]);
   const [form, setForm] = useState(emptyQuestion);
   const [editingId, setEditingId] = useState<string>();
   const [error, setError] = useState('');
@@ -56,6 +58,34 @@ export function QuestionAdminPage({ token }: { token: string }) {
     setError(''); setImporting(true);
     try { setImportReport((await importQuestionCsv(token, csvFile, 'import')).data); await load(); } catch (reason: unknown) { setError(reason instanceof Error ? reason.message : 'Could not import CSV.'); } finally { setImporting(false); }
   }
+
+  function categoryLabel(value: string): string {
+    if (value === 'unassigned') return 'Unassigned';
+    return categories.find((category) => category.id === value)?.name ?? value;
+  }
+
+  function levelLabel(value: string): string {
+    return levels.find((level) => level.id === value)?.name ?? value;
+  }
+
+  function selectedValues(event: { target: HTMLSelectElement }): string[] {
+    return Array.from(event.target.selectedOptions, (option) => option.value);
+  }
+
+  const hasActiveFilters = categoryFilters.length > 0 || typeFilters.length > 0 || levelFilters.length > 0;
+
+  function clearFilters(): void {
+    setCategoryFilters([]);
+    setTypeFilters([]);
+    setLevelFilters([]);
+  }
+
+  const filteredQuestions = questions.filter((question) => {
+    const categoryMatch = categoryFilters.length === 0 || categoryFilters.includes(question.category ? question.category.id : 'unassigned');
+    const typeMatch = typeFilters.length === 0 || typeFilters.includes(question.type);
+    const levelMatch = levelFilters.length === 0 || levelFilters.includes(question.expertiseLevel.id);
+    return categoryMatch && typeMatch && levelMatch;
+  });
 
   async function toggleActive(question: Question): Promise<void> {
     try {
@@ -101,7 +131,21 @@ export function QuestionAdminPage({ token }: { token: string }) {
       <label className="checkbox-label"><input type="checkbox" checked={form.active} onChange={(event) => setForm({ ...form, active: event.target.checked })} /> Active</label>
       <div><button type="submit">{editingId ? 'Save changes' : 'Create question'}</button>{editingId && <button type="button" className="secondary" onClick={() => { setForm(emptyQuestion); setEditingId(undefined); }}>Cancel</button>}</div>
     </form>
-    <label>Filter by category<select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}><option value="">All categories</option><option value="unassigned">Unassigned</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
-    <div className="table-wrap"><table><thead><tr><th>Code</th><th>Question</th><th>Type</th><th>Category</th><th>Subject</th><th>Year group</th><th>Difficulty</th><th>Status</th><th>Actions</th></tr></thead><tbody>{questions.filter((question) => !categoryFilter || (categoryFilter === 'unassigned' ? !question.category : question.category?.id === categoryFilter)).map((question) => <tr key={question.id}><td>{question.questionCode}</td><td>{question.text}</td><td>{question.type}</td><td>{question.category?.name ?? 'Unassigned'}</td><td>{question.skill.name}</td><td>{question.expertiseLevel.name}</td><td>{question.difficulty}</td><td>{question.active ? 'Active' : 'Inactive'}</td><td><button type="button" onClick={() => edit(question)}>Edit</button> <button type="button" onClick={() => toggleActive(question)}>{question.active ? 'Deactivate' : 'Activate'}</button> <button type="button" className="danger" onClick={() => remove(question.id)}>Delete</button></td></tr>)}</tbody></table></div>
+    <section className="panel filter-bar">
+      <h3>Filter questions</h3>
+      <div className="filter-controls">
+        <label>Category<select multiple size={4} value={categoryFilters} onChange={(event) => setCategoryFilters(selectedValues(event))}><option value="unassigned">Unassigned</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
+        <label>Question type<select multiple size={4} value={typeFilters} onChange={(event) => setTypeFilters(selectedValues(event))}>{questionTypes.map((type) => <option key={type.id} value={type.name}>{type.name}</option>)}</select></label>
+        <label>Expertise level<select multiple size={4} value={levelFilters} onChange={(event) => setLevelFilters(selectedValues(event))}>{levels.map((level) => <option key={level.id} value={level.id}>{level.name}</option>)}</select></label>
+        <button type="button" className="secondary" onClick={clearFilters} disabled={!hasActiveFilters}>Clear filters</button>
+      </div>
+      {hasActiveFilters && <div className="active-filters">
+        <span>Active filters:</span>
+        {categoryFilters.map((value) => <span className="filter-chip" key={`category-${value}`}>{categoryLabel(value)}<button type="button" onClick={() => setCategoryFilters((current) => current.filter((item) => item !== value))} aria-label={`Remove category filter ${categoryLabel(value)}`}>×</button></span>)}
+        {typeFilters.map((value) => <span className="filter-chip" key={`type-${value}`}>{value}<button type="button" onClick={() => setTypeFilters((current) => current.filter((item) => item !== value))} aria-label={`Remove question type filter ${value}`}>×</button></span>)}
+        {levelFilters.map((value) => <span className="filter-chip" key={`level-${value}`}>{levelLabel(value)}<button type="button" onClick={() => setLevelFilters((current) => current.filter((item) => item !== value))} aria-label={`Remove expertise level filter ${levelLabel(value)}`}>×</button></span>)}
+      </div>}
+    </section>
+    <div className="table-wrap"><table><thead><tr><th>Code</th><th>Question</th><th>Type</th><th>Category</th><th>Subject</th><th>Year group</th><th>Difficulty</th><th>Status</th><th>Actions</th></tr></thead><tbody>{filteredQuestions.length === 0 ? <tr><td colSpan={9} className="empty-state">No questions match the selected filters.</td></tr> : filteredQuestions.map((question) => <tr key={question.id}><td>{question.questionCode}</td><td>{question.text}</td><td>{question.type}</td><td>{question.category?.name ?? 'Unassigned'}</td><td>{question.skill.name}</td><td>{question.expertiseLevel.name}</td><td>{question.difficulty}</td><td>{question.active ? 'Active' : 'Inactive'}</td><td><button type="button" onClick={() => edit(question)}>Edit</button> <button type="button" onClick={() => toggleActive(question)}>{question.active ? 'Deactivate' : 'Activate'}</button> <button type="button" className="danger" onClick={() => remove(question.id)}>Delete</button></td></tr>)}</tbody></table></div>
   </section>;
 }
