@@ -2,11 +2,19 @@ import { parse } from 'csv-parse/sync';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { PrismaClient } from '@prisma/client';
+import { maxScoreValue } from '../questions/questionSchemas';
 
 const allowedDifficulties = new Set(['Easy', 'Medium', 'Hard']);
 const requiredColumns = ['questionCode', 'skill', 'level', 'type', 'difficulty', 'language', 'questionText', 'option1', 'score1', 'option2', 'score2', 'option3', 'score3', 'explanation'] as const;
+const optionalColumns = ['option4', 'score4', 'option5', 'score5'] as const;
 type RequiredColumn = (typeof requiredColumns)[number];
-type CsvQuestionRow = Record<RequiredColumn, string> & { categoryId: string };
+type OptionalColumn = (typeof optionalColumns)[number];
+type CsvColumn = RequiredColumn | OptionalColumn;
+type CsvQuestionRow = Record<CsvColumn, string> & { categoryId: string };
+
+const optionColumns = ['option1', 'option2', 'option3', 'option4', 'option5'] as const;
+const scoreColumns = ['score1', 'score2', 'score3', 'score4', 'score5'] as const;
+const requiredGenericColumns = ['questionCode', 'skill', 'level', 'type', 'difficulty', 'language', 'questionText', 'explanation'] as const;
 
 export interface ImportError { row: number; messages: string[]; }
 export interface QuestionImportPreview { row: number; questionCode: string; skill: string; level: string; type: string; difficulty: string; questionText: string; valid: boolean; errors: string[]; }
@@ -44,10 +52,41 @@ function parseScore(value: string): number | undefined {
   return Number.isInteger(score) ? score : undefined;
 }
 
+function validateHeader(csvContent: string): string[] {
+  const headerRows = parse(csvContent, { to_line: 1, skip_empty_lines: true, trim: true, bom: true }) as string[][];
+  const header = headerRows[0] ?? [];
+  const errors: string[] = [];
+
+  if (header.length === 0) {
+    return ['CSV file is empty or missing a header row.'];
+  }
+
+  const missing = requiredColumns.filter((column) => !header.includes(column));
+  if (missing.length > 0) errors.push(`Missing required column(s): ${missing.join(', ')}.`);
+
+  const counts = new Map<string, number>();
+  header.forEach((column) => { if (column) counts.set(column, (counts.get(column) ?? 0) + 1); });
+  const duplicated = [...counts.entries()].filter(([, count]) => count > 1).map(([column]) => column);
+  if (duplicated.length > 0) errors.push(`Duplicate column header(s): ${duplicated.join(', ')}.`);
+
+  const knownColumns = new Set<string>([...requiredColumns, 'categoryId', ...optionalColumns]);
+  const unknown = [...new Set(header.filter((column) => column && !knownColumns.has(column)))];
+  if (unknown.length > 0) errors.push(`Unrecognized column header(s): ${unknown.join(', ')}.`);
+
+  return errors;
+}
+
 export async function validateQuestionsCsv(prisma: PrismaClient, csvContent: string): Promise<ValidatedQuestionCsv> {
   const report = emptyReport();
+
+  const headerErrors = validateHeader(csvContent);
+  if (headerErrors.length > 0) {
+    report.errors.push({ row: 1, messages: headerErrors.map((message) => `Row 1 – header: ${message}`) });
+    return { report, rows: [] };
+  }
+
   const parsedRows = parse(csvContent, { columns: true, skip_empty_lines: true, trim: true, bom: true }) as Array<Record<string, string>>;
-  const rows = parsedRows.map((parsedRow) => requiredColumns.reduce((row, column) => {
+  const rows = parsedRows.map((parsedRow) => [...requiredColumns, ...optionalColumns].reduce((row, column) => {
     row[column] = parsedRow[column] ?? '';
     return row;
   }, { categoryId: parsedRow.categoryId ?? '' } as CsvQuestionRow));
@@ -70,21 +109,69 @@ export async function validateQuestionsCsv(prisma: PrismaClient, csvContent: str
   rows.forEach((row, index) => {
     const rowNumber = index + 2;
     const errors: string[] = [];
-    const missing = requiredColumns.filter((column) => row[column].trim() === '');
-    if (missing.length > 0) errors.push(`Missing required fields: ${missing.join(', ')}`);
-    if (seenCodes.has(row.questionCode)) {
-      errors.push(`Duplicate question code: ${row.questionCode}`);
+    const field = (name: string, reason: string): void => {
+      errors.push(`Row ${rowNumber} – ${row.questionCode || '(no code)'} – ${name}: ${reason}`);
+    };
+
+    requiredGenericColumns.forEach((column) => {
+      if (row[column].trim() === '') field(column, `${column} is required.`);
+    });
+
+    if (row.questionCode && seenCodes.has(row.questionCode)) {
+      field('questionCode', `Duplicate question code: ${row.questionCode}`);
       report.duplicateRows += 1;
     }
-    if (!skillIds.has(row.skill) && row.skill) errors.push(`Skill does not exist: ${row.skill}`);
-    if (!levelIds.has(row.level) && row.level) errors.push(`Expertise level does not exist: ${row.level}`);
-    if (!allowedQuestionTypes.has(row.type)) errors.push(`Invalid question type: ${row.type}`);
-    if (row.categoryId && !categoryIds.has(row.categoryId)) errors.push(`Question category does not exist or is inactive: ${row.categoryId}`);
-    if (!allowedDifficulties.has(row.difficulty)) errors.push(`Invalid difficulty: ${row.difficulty}`);
+    if (row.skill && !skillIds.has(row.skill)) field('skill', `Skill does not exist: ${row.skill}`);
+    if (row.level && !levelIds.has(row.level)) field('level', `Expertise level does not exist: ${row.level}`);
+    if (row.type && !allowedQuestionTypes.has(row.type)) field('type', `Invalid question type: ${row.type}`);
+    if (row.categoryId && !categoryIds.has(row.categoryId)) field('categoryId', `Question category does not exist or is inactive: ${row.categoryId}`);
+    if (row.difficulty && !allowedDifficulties.has(row.difficulty)) field('difficulty', `Invalid difficulty: ${row.difficulty}`);
 
-    const scores = [parseScore(row.score1), parseScore(row.score2), parseScore(row.score3)];
-    if (scores.some((score) => score === undefined || score < 1 || score > 3) || new Set(scores).size !== 3) {
-      errors.push('Option scores must contain one each of 1, 2, and 3.');
+    ([0, 1, 2] as const).forEach((optionIndex) => {
+      const column = optionColumns[optionIndex];
+      if (row[column].trim() === '') field(column, `Option ${optionIndex + 1} is required.`);
+    });
+
+    const option4Populated = row.option4.trim() !== '';
+    const option5Populated = row.option5.trim() !== '';
+    if (option5Populated && !option4Populated) {
+      field('option5', 'Option 4 must be populated before Option 5.');
+    }
+    if (!option4Populated && row.score4.trim() !== '') {
+      field('score4', 'Score 4 must not be set without Option 4.');
+    }
+    if (!option5Populated && row.score5.trim() !== '') {
+      field('score5', 'Score 5 must not be set without Option 5.');
+    }
+
+    const optionCount = option4Populated && option5Populated ? 5 : option4Populated ? 4 : 3;
+    const activeOptionColumns = optionColumns.slice(0, optionCount);
+    const activeScoreColumns = scoreColumns.slice(0, optionCount);
+
+    const scores: Array<number | undefined> = activeScoreColumns.map((scoreColumn, optionIndex) => {
+      const optionColumn = activeOptionColumns[optionIndex];
+      const raw = row[scoreColumn];
+      if (row[optionColumn].trim() === '') return undefined;
+      if (raw.trim() === '') {
+        field(scoreColumn, `${scoreColumn} is required when ${optionColumn} is populated.`);
+        return undefined;
+      }
+      const parsed = parseScore(raw);
+      if (parsed === undefined || parsed < 0 || parsed > maxScoreValue) {
+        field(scoreColumn, `Invalid score value. Must be an integer between 0 and ${maxScoreValue}.`);
+        return undefined;
+      }
+      return parsed;
+    });
+
+    let highestScore: number | undefined;
+    if (scores.every((score) => score !== undefined)) {
+      const definedScores = scores as number[];
+      highestScore = Math.max(...definedScores);
+      const highestScoreCount = definedScores.filter((score) => score === highestScore).length;
+      if (highestScoreCount !== 1) {
+        field('score', 'Exactly one option must have the highest score to indicate the correct answer.');
+      }
     }
 
     const valid = errors.length === 0;
@@ -101,7 +188,11 @@ export async function validateQuestionsCsv(prisma: PrismaClient, csvContent: str
         language: row.language,
         explanation: row.explanation,
         ...(row.categoryId ? { categoryId: row.categoryId } : {}),
-        options: [row.option1, row.option2, row.option3].map((optionText, optionIndex) => ({ optionText, score: scores[optionIndex]!, isCorrect: scores[optionIndex] === 3 }))
+        options: activeOptionColumns.map((column, optionIndex) => ({
+          optionText: row[column],
+          score: scores[optionIndex]!,
+          isCorrect: scores[optionIndex] === highestScore
+        }))
       });
     } else {
       report.invalidRows += 1;

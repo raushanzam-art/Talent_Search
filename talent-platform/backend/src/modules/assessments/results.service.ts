@@ -43,7 +43,7 @@ export async function getAssessmentResults(
       assessment: { select: { id: true, name: true } },
       questions: {
         orderBy: { position: 'asc' },
-        include: { question: { select: { skill: { select: { id: true, name: true } } } } }
+        include: { question: { select: { skill: { select: { id: true, name: true } }, options: { select: { score: true } } } } }
       },
       answers: { select: { questionId: true, score: true, timeSpent: true } }
     }
@@ -76,8 +76,9 @@ export async function getAssessmentResults(
       questionsAnswered: 0,
       questionsTimedOut: 0
     };
+    const questionMaxScore = snapshot.question.options.reduce((max, option) => Math.max(max, option.score), 0);
     current.score += score;
-    current.maxScore += 3;
+    current.maxScore += questionMaxScore;
     if (answer) current.questionsAnswered += 1;
     if (timedOut) current.questionsTimedOut += 1;
     current.percentage = current.maxScore === 0 ? 0 : (current.score / current.maxScore) * 100;

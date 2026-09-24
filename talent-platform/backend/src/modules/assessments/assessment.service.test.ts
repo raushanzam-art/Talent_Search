@@ -22,8 +22,8 @@ describe('assessment creation and selection', () => {
       assessment: { findUnique: vi.fn().mockResolvedValue({
         id: 'assessment-1', active: true, questionCount: 2,
         questions: [
-          { questionId: 'question-1', position: 0, question: { id: 'question-1', expertiseLevelId: 'level-1' } },
-          { questionId: 'question-2', position: 1, question: { id: 'question-2', expertiseLevelId: 'level-1' } }
+          { questionId: 'question-1', position: 0, question: { id: 'question-1', expertiseLevelId: 'level-1', options: [{ score: 1 }, { score: 2 }, { score: 3 }] } },
+          { questionId: 'question-2', position: 1, question: { id: 'question-2', expertiseLevelId: 'level-1', options: [{ score: 1 }, { score: 2 }, { score: 3 }] } }
         ]
       }) },
       assessmentAssignment: { findUnique: vi.fn().mockResolvedValue({ id: 'assignment-1', status: 'ASSIGNED' }) },

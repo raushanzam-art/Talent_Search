@@ -32,6 +32,14 @@ export function QuestionAdminPage({ token }: { token: string }) {
     setForm((current) => ({ ...current, options: current.options.map((option, optionIndex) => optionIndex === index ? { ...option, [field]: field === 'score' ? Number(value) : value } : option) }));
   }
 
+  function addOption(): void {
+    setForm((current) => current.options.length >= 5 ? current : { ...current, options: [...current.options, { optionText: '', score: current.options.length + 1, isCorrect: false }] });
+  }
+
+  function removeLastOption(): void {
+    setForm((current) => current.options.length <= 3 ? current : { ...current, options: current.options.slice(0, -1) });
+  }
+
   function edit(question: Question): void {
     setEditingId(question.id);
     setForm({ questionCode: question.questionCode, text: question.text, skillId: question.skill.id, expertiseLevelId: question.expertiseLevel.id, categoryId: question.category?.id ?? '', type: question.type, difficulty: question.difficulty, language: question.language, explanation: question.explanation ?? '', active: question.active, options: question.options.map((option) => ({ optionText: option.optionText, score: option.score ?? 1, isCorrect: option.isCorrect ?? false })) });
@@ -126,7 +134,14 @@ export function QuestionAdminPage({ token }: { token: string }) {
       <label>Type<select value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value })}>{questionTypes.filter((type) => type.active || type.name === form.type).map((type) => <option key={type.id} value={type.name}>{type.name}</option>)}</select></label>
       <label>Difficulty<select value={form.difficulty} onChange={(event) => setForm({ ...form, difficulty: event.target.value })}>{['Easy', 'Medium', 'Hard'].map((difficulty) => <option key={difficulty}>{difficulty}</option>)}</select></label>
       <label>Language<input value={form.language} onChange={(event) => setForm({ ...form, language: event.target.value })} required /></label>
-      {form.options.map((option, index) => <div className="option-row" key={index}><label>Option {index + 1}<input value={option.optionText} onChange={(event) => updateOption(index, 'optionText', event.target.value)} required /></label><label>Score<input type="number" min="1" max="3" value={option.score} onChange={(event) => updateOption(index, 'score', event.target.value)} required /></label><label>Correct<input type="checkbox" checked={option.isCorrect} onChange={(event) => updateOption(index, 'isCorrect', event.target.checked)} /></label></div>)}
+      <p className="option-row-actions field-hint">The correct option must have a strictly higher score than every other option. Wrong options don't need to differ from each other &mdash; e.g. simple right/wrong marking (correct = 1, wrong = 0) is fine, as is a partial-credit ranking.</p>
+      {form.options.map((option, index) => <div className="option-row" key={index}>
+        <label>Option {index + 1} {index < 3 ? <em>(required)</em> : <em>(optional)</em>}<input value={option.optionText} onChange={(event) => updateOption(index, 'optionText', event.target.value)} required /></label>
+        <label>Score<input type="number" min="0" max="100" value={option.score} onChange={(event) => updateOption(index, 'score', event.target.value)} required /></label>
+        <label>Correct<input type="checkbox" checked={option.isCorrect} onChange={(event) => updateOption(index, 'isCorrect', event.target.checked)} /></label>
+        {index >= 3 && index === form.options.length - 1 && <button type="button" className="secondary" onClick={removeLastOption}>Remove option {index + 1}</button>}
+      </div>)}
+      {form.options.length < 5 && <div className="option-row-actions"><button type="button" className="secondary" onClick={addOption}>Add option {form.options.length + 1} (optional)</button></div>}
       <label>Explanation<textarea value={form.explanation} onChange={(event) => setForm({ ...form, explanation: event.target.value })} /></label>
       <label className="checkbox-label"><input type="checkbox" checked={form.active} onChange={(event) => setForm({ ...form, active: event.target.checked })} /> Active</label>
       <div><button type="submit">{editingId ? 'Save changes' : 'Create question'}</button>{editingId && <button type="button" className="secondary" onClick={() => { setForm(emptyQuestion); setEditingId(undefined); }}>Cancel</button>}</div>

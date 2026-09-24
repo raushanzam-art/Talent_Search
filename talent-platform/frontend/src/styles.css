@@ -27,7 +27,10 @@ h2, h3 { margin: 0; }
 label { display: grid; gap: 0.35rem; font-weight: 700; }
 input, select, textarea { width: 100%; border: 1px solid #aaa397; border-radius: 4px; padding: 0.6rem; background: white; color: #18332f; }
 textarea { min-height: 5rem; resize: vertical; }
-.option-row { display: grid; grid-column: 1 / -1; grid-template-columns: 1fr 7rem 5rem; gap: 1rem; align-items: end; }
+.option-row { display: grid; grid-column: 1 / -1; grid-template-columns: 1fr 7rem 5rem 9rem; gap: 1rem; align-items: end; }
+.option-row label em { display: block; font-weight: 400; font-size: 0.75rem; color: #5d625b; font-style: normal; }
+.option-row-actions { grid-column: 1 / -1; }
+.field-hint { margin: 0; font-weight: 400; font-size: 0.85rem; color: #5d625b; }
 .checkbox-label { display: flex; grid-template-columns: auto 1fr; align-items: center; gap: 0.5rem; }
 .checkbox-label input, .option-row input[type='checkbox'] { width: auto; }
 .filter-bar { display: grid; gap: 1rem; }

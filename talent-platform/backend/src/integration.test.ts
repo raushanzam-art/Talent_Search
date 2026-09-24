@@ -117,4 +117,66 @@ describe.sequential('HTTP integration flow', () => {
     const adminResult = await request(app).get(`/api/v1/attempts/${attemptId}/results`).set('Authorization', `Bearer ${adminToken}`);
     expect(adminResult.status).toBe(200);
   });
+
+  it('serves only populated options for a 5-option question and computes a per-question max score', async () => {
+    const skill = await prisma.skill.findFirstOrThrow({ where: { name: 'Verbal Reasoning' } });
+    const level = await prisma.expertiseLevel.findFirstOrThrow({ where: { name: 'Beginner' } });
+    const fiveOptionQuestion = await prisma.question.create({
+      data: {
+        questionCode: 'INT-5OPT',
+        text: 'Pick the best of five',
+        skillId: skill.id,
+        expertiseLevelId: level.id,
+        questionType: 'VERBAL',
+        difficulty: 'Easy',
+        language: 'en',
+        options: {
+          create: [
+            { optionText: 'Worst', score: 1, isCorrect: false },
+            { optionText: 'Poor', score: 2, isCorrect: false },
+            { optionText: 'Fair', score: 3, isCorrect: false },
+            { optionText: 'Good', score: 4, isCorrect: false },
+            { optionText: 'Best', score: 5, isCorrect: true }
+          ]
+        }
+      }
+    });
+    const threeOptionQuestion = await prisma.question.findFirstOrThrow({ where: { questionCode: 'INT-001' } });
+
+    const mixedAssessment = await prisma.assessment.create({
+      data: {
+        name: 'Mixed Option Count Assessment',
+        questionCount: 2,
+        questions: {
+          create: [
+            { questionId: threeOptionQuestion.id, position: 0 },
+            { questionId: fiveOptionQuestion.id, position: 1 }
+          ]
+        }
+      }
+    });
+    await prisma.assessmentAssignment.create({ data: { userId: candidateId, assessmentId: mixedAssessment.id } });
+
+    const start = await request(app).post(`/api/v1/assessments/${mixedAssessment.id}/start`).set('Authorization', `Bearer ${candidateToken}`);
+    expect(start.status).toBe(201);
+    const mixedAttemptId = start.body.data.attemptId as string;
+
+    // The candidate's starting question order is randomized, so match by question id rather than position.
+    const expectedOptionCount = (questionId: string): number => questionId === fiveOptionQuestion.id ? 5 : 3;
+    expect(start.body.data.question.options).toHaveLength(expectedOptionCount(start.body.data.question.id));
+
+    const firstQuestion = await prisma.question.findUniqueOrThrow({ where: { id: start.body.data.question.id as string }, include: { options: true } });
+    const answer1 = await request(app).post(`/api/v1/attempts/${mixedAttemptId}/answers`).set('Authorization', `Bearer ${candidateToken}`).send({ questionId: firstQuestion.id, optionId: firstQuestion.options[0].id });
+    expect(answer1.status).toBe(200);
+    expect(answer1.body.data.nextQuestion.options).toHaveLength(expectedOptionCount(answer1.body.data.nextQuestion.id));
+
+    const secondQuestion = await prisma.question.findUniqueOrThrow({ where: { id: answer1.body.data.nextQuestion.id as string }, include: { options: true } });
+    const answer2 = await request(app).post(`/api/v1/attempts/${mixedAttemptId}/answers`).set('Authorization', `Bearer ${candidateToken}`).send({ questionId: secondQuestion.id, optionId: secondQuestion.options[0].id });
+    expect(answer2.status).toBe(200);
+    expect(answer2.body.data.nextQuestion).toBeNull();
+
+    const results = await request(app).get(`/api/v1/attempts/${mixedAttemptId}/results`).set('Authorization', `Bearer ${candidateToken}`);
+    expect(results.status).toBe(200);
+    expect(results.body.data.maxScore).toBe(8);
+  });
 });

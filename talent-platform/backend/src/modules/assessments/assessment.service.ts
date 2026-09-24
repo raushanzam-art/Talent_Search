@@ -67,6 +67,10 @@ function toCandidateQuestion(question: CandidateQuestionRecord): CandidateQuesti
   };
 }
 
+function questionMaxScore(options: Array<{ score: number }>): number {
+  return options.reduce((max, option) => Math.max(max, option.score), 0);
+}
+
 function shuffle<T>(items: T[]): T[] {
   const shuffled = [...items];
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
@@ -105,7 +109,7 @@ export async function startAssessment(
       questions: {
         where: { question: { active: true } },
         orderBy: { position: 'asc' },
-        include: { question: { select: { id: true, expertiseLevelId: true } } }
+        include: { question: { select: { id: true, expertiseLevelId: true, options: { select: { score: true } } } } }
       }
     }
   });
@@ -158,6 +162,8 @@ export async function startAssessment(
   }
 
   const selectedQuestionIds = randomizeQuestionIds(eligibleQuestionIds).slice(0, assessment.questionCount);
+  const maxScoreByQuestionId = new Map(assessment.questions.map((configured) => [configured.questionId, questionMaxScore(configured.question.options)]));
+  const totalMaxScore = selectedQuestionIds.reduce((sum, questionId) => sum + (maxScoreByQuestionId.get(questionId) ?? 0), 0);
   const startedAt = new Date();
   const attempt = await prisma.$transaction(async (transaction) => {
     const createdAttempt = await transaction.assessmentAttempt.create({
@@ -165,7 +171,7 @@ export async function startAssessment(
         userId,
         assessmentId,
         startedAt,
-        maxScore: assessment.questionCount * 3,
+        maxScore: totalMaxScore,
         questions: {
           create: selectedQuestionIds.map((questionId, position) => ({
             questionId,
