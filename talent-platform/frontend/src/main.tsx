@@ -5,6 +5,7 @@ import { QuestionAdminPage } from './QuestionAdminPage';
 import { ResourceAdminPage } from './ResourceAdminPage';
 import { CandidateAssessmentPage } from './CandidateAssessmentPage';
 import { AssessmentResultsPage } from './AssessmentResultsPage';
+import { AttemptAnswersReviewPage } from './AttemptAnswersReviewPage';
 import { AdminAssessmentPage } from './AdminAssessmentPage';
 import { CandidateLoginPage } from './CandidateLoginPage';
 import { CandidateDashboardPage } from './CandidateDashboardPage';
@@ -18,6 +19,8 @@ function App() {
   if (assessmentMatch) return <CandidateAssessmentPage attemptId={assessmentMatch[1]} />;
   const resultsMatch = path.match(/^\/results\/([^/]+)$/);
   if (resultsMatch) return <AssessmentResultsPage attemptId={resultsMatch[1]} />;
+  const reviewMatch = path.match(/^\/review\/([^/]+)$/);
+  if (reviewMatch) return <AttemptAnswersReviewPage attemptId={reviewMatch[1]} />;
   if (path === '/login') return <CandidateLoginPage />;
   if (path === '/candidate') return <CandidateDashboardPage />;
   return <AdminShell>{(token) => path === '/admin/skills'

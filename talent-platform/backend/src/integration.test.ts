@@ -118,6 +118,34 @@ describe.sequential('HTTP integration flow', () => {
     expect(adminResult.status).toBe(200);
   });
 
+  it('returns detailed per-question answer review once the attempt is completed', async () => {
+    const candidateDetail = await request(app).get(`/api/v1/attempts/${attemptId}/answers`).set('Authorization', `Bearer ${candidateToken}`);
+    expect(candidateDetail.status).toBe(200);
+    expect(candidateDetail.body.data).toMatchObject({ attemptId, status: 'COMPLETED', totalQuestions: 2, matchingQuestions: 2, page: 1, pageSize: 20 });
+    expect(candidateDetail.body.data.questions).toHaveLength(2);
+    for (const questionDetail of candidateDetail.body.data.questions) {
+      expect(questionDetail.correctAnswer).toEqual({ optionId: expect.any(String), optionText: expect.any(String) });
+      expect(questionDetail.candidateAnswer).toMatchObject({ optionId: expect.any(String) });
+      expect(typeof questionDetail.isCorrect).toBe('boolean');
+      expect(questionDetail.isTimedOut).toBe(false);
+    }
+
+    const filtered = await request(app).get(`/api/v1/attempts/${attemptId}/answers?status=correct&pageSize=1`).set('Authorization', `Bearer ${candidateToken}`);
+    expect(filtered.status).toBe(200);
+    expect(filtered.body.data.pageSize).toBe(1);
+    expect(filtered.body.data.questions.length).toBeLessThanOrEqual(1);
+
+    const adminDetail = await request(app).get(`/api/v1/attempts/${attemptId}/answers`).set('Authorization', `Bearer ${adminToken}`);
+    expect(adminDetail.status).toBe(200);
+
+    const otherEmail = `other-candidate-${Date.now()}@example.com`;
+    await request(app).post('/api/v1/auth/register').send({ firstName: 'Other', lastName: 'Candidate', email: otherEmail, password: 'CandidatePassword123!' });
+    const otherLogin = await request(app).post('/api/v1/auth/login').send({ email: otherEmail, password: 'CandidatePassword123!' });
+    const otherToken = otherLogin.body.token as string;
+    const otherAccess = await request(app).get(`/api/v1/attempts/${attemptId}/answers`).set('Authorization', `Bearer ${otherToken}`);
+    expect(otherAccess.status).toBe(404);
+  });
+
   it('serves only populated options for a 5-option question and computes a per-question max score', async () => {
     const skill = await prisma.skill.findFirstOrThrow({ where: { name: 'Verbal Reasoning' } });
     const level = await prisma.expertiseLevel.findFirstOrThrow({ where: { name: 'Beginner' } });

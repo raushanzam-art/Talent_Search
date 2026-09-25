@@ -116,6 +116,9 @@ export function AdminAssessmentPage({ token }: { token: string }) {
       <label>Candidate<select value={selectedCandidate} onChange={(event) => setSelectedCandidate(event.target.value)}><option value="">Select candidate</option>{candidates.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.email}</option>)}</select></label>
       <button type="button" onClick={() => void assign()} disabled={!selectedAssessment || !selectedCandidate}>Assign access</button>
     </section>
-    <div className="table-wrap"><table><thead><tr><th>Name</th><th>Questions</th><th>Assignments</th></tr></thead><tbody>{assessments.map((assessment) => <tr key={assessment.id}><td>{assessment.name}</td><td>{assessment.questionCount}</td><td>{assessment.assignments.map((assignment) => assignment.user.email).join(', ') || 'None'}</td></tr>)}</tbody></table></div>
+    <div className="table-wrap"><table><thead><tr><th>Name</th><th>Questions</th><th>Assignments</th></tr></thead><tbody>{assessments.map((assessment) => <tr key={assessment.id}><td>{assessment.name}</td><td>{assessment.questionCount}</td><td>{assessment.assignments.length === 0 ? 'None' : <ul className="assignment-list">{assessment.assignments.map((assignment) => {
+      const latestCompleted = assessment.attempts.filter((attempt) => attempt.userId === assignment.userId && attempt.status === 'COMPLETED').sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())[0];
+      return <li key={assignment.id}>{assignment.user.email}{latestCompleted && <a href={`/review/${latestCompleted.id}`}>Review answers</a>}</li>;
+    })}</ul>}</td></tr>)}</tbody></table></div>
   </section>;
 }

@@ -49,7 +49,14 @@ export function createAdminRoutes(prisma: PrismaClient, jwtSecret: string): Rout
 
   router.get('/assessments', ...adminOnly, async (_request, response, next) => {
     try {
-      response.json({ data: await prisma.assessment.findMany({ include: { questions: { select: { questionId: true, position: true } }, assignments: { select: { id: true, userId: true, status: true, user: { select: { email: true, firstName: true, lastName: true } } } } }, orderBy: { createdAt: 'desc' } }) });
+      response.json({ data: await prisma.assessment.findMany({
+        include: {
+          questions: { select: { questionId: true, position: true } },
+          assignments: { select: { id: true, userId: true, status: true, user: { select: { email: true, firstName: true, lastName: true } } } },
+          attempts: { select: { id: true, userId: true, status: true, score: true, maxScore: true, percentage: true, startedAt: true, completedAt: true }, orderBy: { startedAt: 'desc' } }
+        },
+        orderBy: { createdAt: 'desc' }
+      }) });
     } catch (error: unknown) { next(error); }
   });
 

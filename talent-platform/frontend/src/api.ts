@@ -132,6 +132,17 @@ export interface CandidateAssignment {
   attempt: { id: string; status: string } | null;
 }
 
+export interface AdminAssessmentAttempt {
+  id: string;
+  userId: string;
+  status: string;
+  score: number;
+  maxScore: number;
+  percentage: number | null;
+  startedAt: string;
+  completedAt: string | null;
+}
+
 export interface AdminAssessment {
   id: string;
   name: string;
@@ -139,6 +150,53 @@ export interface AdminAssessment {
   active: boolean;
   questions: Array<{ questionId: string; position: number }>;
   assignments: Array<{ id: string; userId: string; status: string; user: { email: string; firstName: string; lastName: string } }>;
+  attempts: AdminAssessmentAttempt[];
+}
+
+export interface AttemptAnswerOption {
+  id: string;
+  optionText: string;
+  score: number;
+  isCorrect: boolean;
+}
+
+export interface AttemptAnswerDetail {
+  position: number;
+  questionId: string;
+  questionCode: string;
+  text: string;
+  type: string;
+  difficulty: string;
+  skill: { id: string; name: string };
+  category: { id: string; name: string } | null;
+  expertiseLevel: { id: string; name: string };
+  allowedSeconds: number;
+  maxScore: number;
+  options: AttemptAnswerOption[];
+  candidateAnswer: { optionId: string; optionText: string; score: number; submittedAt: string; timeSpent: number } | null;
+  correctAnswer: { optionId: string; optionText: string };
+  explanation: string | null;
+  isCorrect: boolean;
+  isTimedOut: boolean;
+  timeSpent: number;
+}
+
+export type AttemptAnswerStatus = 'correct' | 'incorrect' | 'timedOut' | 'unanswered';
+
+export interface AttemptAnswersReport {
+  attemptId: string;
+  assessmentId: string;
+  assessmentName: string;
+  status: string;
+  score: number;
+  maxScore: number;
+  percentage: number;
+  totalQuestions: number;
+  matchingQuestions: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  questions: AttemptAnswerDetail[];
 }
 
 export interface CandidateSummary { id: string; email: string; firstName: string; lastName: string; }
@@ -231,6 +289,15 @@ export function submitAnswer(token: string, attemptId: string, questionId: strin
 
 export function getAssessmentResults(token: string, attemptId: string): Promise<{ data: AssessmentResults }> {
   return request(`/attempts/${attemptId}/results`, {}, token);
+}
+
+export function getAttemptAnswers(token: string, attemptId: string, params: { status?: AttemptAnswerStatus; page?: number; pageSize?: number } = {}): Promise<{ data: AttemptAnswersReport }> {
+  const query = new URLSearchParams();
+  if (params.status) query.set('status', params.status);
+  if (params.page) query.set('page', String(params.page));
+  if (params.pageSize) query.set('pageSize', String(params.pageSize));
+  const queryString = query.toString();
+  return request(`/attempts/${attemptId}/answers${queryString ? `?${queryString}` : ''}`, {}, token);
 }
 
 export function getCandidateAssignments(token: string): Promise<{ data: CandidateAssignment[] }> { return request('/candidate/assignments', {}, token); }

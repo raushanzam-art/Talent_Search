@@ -5,10 +5,17 @@ import { AuthenticatedRequest, createAuthenticateMiddleware } from '../auth/auth
 import { submitAnswer } from './answer.service';
 import { getCurrentAttempt } from './current.service';
 import { getAssessmentResults } from './results.service';
+import { getAttemptAnswerDetails } from './attemptDetail.service';
 
 const answerSchema = z.object({
   questionId: z.string().uuid(),
   optionId: z.string().uuid().optional()
+}).strict();
+
+const attemptAnswersQuerySchema = z.object({
+  status: z.enum(['correct', 'incorrect', 'timedOut', 'unanswered']).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(20)
 }).strict();
 
 export function createAttemptRoutes(prisma: PrismaClient, jwtSecret: string): Router {
@@ -38,6 +45,21 @@ export function createAttemptRoutes(prisma: PrismaClient, jwtSecret: string): Ro
         return;
       }
       response.status(200).json({ data: await getCurrentAttempt(prisma, authenticatedRequest.user.id, attemptId) });
+    } catch (error: unknown) {
+      next(error);
+    }
+  });
+
+  router.get('/:attemptId/answers', authenticate, async (request, response, next) => {
+    try {
+      const attemptId = z.string().uuid().parse(request.params.attemptId);
+      const query = attemptAnswersQuerySchema.parse(request.query);
+      const authenticatedRequest = request as AuthenticatedRequest;
+      if (!authenticatedRequest.user) {
+        response.status(401).json({ error: 'Authentication required.' });
+        return;
+      }
+      response.status(200).json({ data: await getAttemptAnswerDetails(prisma, authenticatedRequest.user, attemptId, query) });
     } catch (error: unknown) {
       next(error);
     }

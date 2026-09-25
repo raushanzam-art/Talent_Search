@@ -1,0 +1,2 @@
+questionCode,skill,level,type,categoryId,difficulty,language,questionText,option1,score1,option2,score2,option3,score3,option4,score4,option5,score5,explanation
+EN_GRM_YR7_<START_NUMBER>,Grammar,Intermediate,single_choice,secondary,Medium,en,<Question text>,<Choice 1>,<0 or 1>,<Choice 2>,<0 or 1>,<Choice 3>,<0 or 1>,<Choice 4>,<0 or 1>,None of these above,<0 or 1>,<Explanation of the correct answer>

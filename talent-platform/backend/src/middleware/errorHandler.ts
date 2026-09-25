@@ -18,6 +18,7 @@ import {
   DuplicateAnswerError,
   QuestionTimedOutError
 } from '../modules/assessments/answer.service';
+import { AttemptNotCompletedError } from '../modules/assessments/attemptDetail.service';
 
 export const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {
   if (error instanceof ZodError) {
@@ -73,7 +74,7 @@ export const errorHandler: ErrorRequestHandler = (error, _request, response, _ne
     return;
   }
 
-  if (error instanceof DuplicateAnswerError || error instanceof AttemptCompletedError) {
+  if (error instanceof DuplicateAnswerError || error instanceof AttemptCompletedError || error instanceof AttemptNotCompletedError) {
     response.status(409).json({ error: error.message });
     return;
   }
