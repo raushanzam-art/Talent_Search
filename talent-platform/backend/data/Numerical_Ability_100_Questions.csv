@@ -1,0 +1,101 @@
+questionCode,skill,level,type,categoryId,difficulty,language,questionText,option1,score1,option2,score2,option3,score3,option4,score4,explanation
+NUM_SEC_0001,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,Simplify the expression: (50 x 8) - 16 + 50,439,0,446,0,434,1,424,0,No explanation
+NUM_SEC_0002,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,"Find the next number in the series: 4, 7, 10, 13, 16, ?",24,0,22,0,17,0,19,1,No explanation
+NUM_SEC_0003,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,A car travels at a constant speed of 42 km/h. How far will it travel in 3 hours?,106,0,156,0,141,0,126,1,No explanation
+NUM_SEC_0004,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,An item priced at £300 is on sale with a 10% discount. What is the sale price?,280,0,289,0,270,1,290,0,No explanation
+NUM_SEC_0005,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,"The test scores of three students are 27, 44, and 33. What is their average score?",36.2,0,36.7,0,34.7,1,33.7,0,No explanation
+NUM_SEC_0006,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,Simplify the expression: (37 x 15) - 90 + 37,492,0,514,0,502,1,507,0,No explanation
+NUM_SEC_0007,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,"Find the next number in the series: 3, 6, 9, 12, 15, ?",16,0,21,0,18,1,23,0,No explanation
+NUM_SEC_0008,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,A car travels at a constant speed of 62 km/h. How far will it travel in 5 hours?,325,0,290,0,340,0,310,1,No explanation
+NUM_SEC_0009,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,An item priced at £300 is on sale with a 10% discount. What is the sale price?,284,0,290,0,270,1,280,0,No explanation
+NUM_SEC_0010,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,"The test scores of three students are 40, 49, and 26. What is their average score?",40.3,0,38.3,1,37.3,0,39.8,0,No explanation
+NUM_SEC_0011,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,Simplify the expression: (12 x 12) - 72 + 12,89,0,74,0,96,0,84,1,No explanation
+NUM_SEC_0012,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,"Find the next number in the series: 8, 13, 18, 23, 28, ?",33,1,38,0,31,0,36,0,No explanation
+NUM_SEC_0013,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,A car travels at a constant speed of 50 km/h. How far will it travel in 5 hours?,265,0,230,0,250,1,280,0,No explanation
+NUM_SEC_0014,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,An item priced at £120 is on sale with a 15% discount. What is the sale price?,108,0,102,1,112,0,105,0,No explanation
+NUM_SEC_0015,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,"The test scores of three students are 32, 38, and 35. What is their average score?",35,1,37,0,34,0,36.5,0,No explanation
+NUM_SEC_0016,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,Simplify the expression: (13 x 12) - 24 + 13,145,1,157,0,150,0,135,0,No explanation
+NUM_SEC_0017,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,"Find the next number in the series: 3, 7, 11, 15, 19, ?",28,0,27,0,23,1,21,0,No explanation
+NUM_SEC_0018,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,A car travels at a constant speed of 65 km/h. How far will it travel in 6 hours?,420,0,390,1,405,0,370,0,No explanation
+NUM_SEC_0019,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,An item priced at £150 is on sale with a 20% discount. What is the sale price?,120,1,130,0,135,0,140,0,No explanation
+NUM_SEC_0020,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,"The test scores of three students are 31, 37, and 19. What is their average score?",30.5,0,28,0,29,1,31,0,No explanation
+NUM_SEC_0021,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,Simplify the expression: (17 x 9) - 36 + 17,139,0,134,1,124,0,146,0,No explanation
+NUM_SEC_0022,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,"Find the next number in the series: 8, 14, 20, 26, 32, ?",38,1,44,0,36,0,43,0,No explanation
+NUM_SEC_0023,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,A car travels at a constant speed of 75 km/h. How far will it travel in 3 hours?,240,0,205,0,255,0,225,1,No explanation
+NUM_SEC_0024,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,An item priced at £200 is on sale with a 10% discount. What is the sale price?,191,0,180,1,195,0,190,0,No explanation
+NUM_SEC_0025,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,"The test scores of three students are 28, 46, and 20. What is their average score?",33.3,0,32.8,0,30.3,0,31.3,1,No explanation
+NUM_SEC_0026,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,Simplify the expression: (50 x 11) - 44 + 50,561,0,568,0,556,1,546,0,No explanation
+NUM_SEC_0027,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,"Find the next number in the series: 7, 13, 19, 25, 31, ?",35,0,43,0,42,0,37,1,No explanation
+NUM_SEC_0028,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,A car travels at a constant speed of 59 km/h. How far will it travel in 4 hours?,216,0,266,0,251,0,236,1,No explanation
+NUM_SEC_0029,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,An item priced at £120 is on sale with a 25% discount. What is the sale price?,90,1,95,0,108,0,100,0,No explanation
+NUM_SEC_0030,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,"The test scores of three students are 24, 45, and 32. What is their average score?",33.7,1,32.7,0,35.7,0,35.2,0,No explanation
+NUM_SEC_0031,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,Simplify the expression: (23 x 11) - 66 + 23,210,1,215,0,200,0,222,0,No explanation
+NUM_SEC_0032,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,"Find the next number in the series: 9, 16, 23, 30, 37, ?",51,0,42,0,44,1,49,0,No explanation
+NUM_SEC_0033,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,A car travels at a constant speed of 54 km/h. How far will it travel in 3 hours?,142,0,177,0,162,1,192,0,No explanation
+NUM_SEC_0034,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,An item priced at £300 is on sale with a 15% discount. What is the sale price?,285,0,270,0,255,1,265,0,No explanation
+NUM_SEC_0035,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,"The test scores of three students are 27, 32, and 16. What is their average score?",26.5,0,27,0,25,1,24,0,No explanation
+NUM_SEC_0036,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,Simplify the expression: (27 x 20) - 100 + 27,467,1,479,0,457,0,472,0,No explanation
+NUM_SEC_0037,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,"Find the next number in the series: 5, 11, 17, 23, 29, ?",41,0,33,0,35,1,40,0,No explanation
+NUM_SEC_0038,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,A car travels at a constant speed of 46 km/h. How far will it travel in 6 hours?,276,1,291,0,256,0,306,0,No explanation
+NUM_SEC_0039,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,An item priced at £250 is on sale with a 10% discount. What is the sale price?,230,0,235,0,225,1,240,0,No explanation
+NUM_SEC_0040,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,"The test scores of three students are 23, 37, and 21. What is their average score?",27,1,29,0,26,0,28.5,0,No explanation
+NUM_SEC_0041,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,Simplify the expression: (18 x 18) - 72 + 18,282,0,270,1,275,0,260,0,No explanation
+NUM_SEC_0042,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,"Find the next number in the series: 3, 9, 15, 21, 27, ?",39,0,31,0,38,0,33,1,No explanation
+NUM_SEC_0043,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,A car travels at a constant speed of 45 km/h. How far will it travel in 4 hours?,180,1,210,0,195,0,160,0,No explanation
+NUM_SEC_0044,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,An item priced at £250 is on sale with a 15% discount. What is the sale price?,235,0,212.50,1,225,0,222,0,No explanation
+NUM_SEC_0045,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,"The test scores of three students are 32, 30, and 27. What is their average score?",29.7,1,31.7,0,31.2,0,28.7,0,No explanation
+NUM_SEC_0046,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,Simplify the expression: (37 x 20) - 80 + 37,687,0,697,1,709,0,702,0,No explanation
+NUM_SEC_0047,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,"Find the next number in the series: 2, 9, 16, 23, 30, ?",42,0,44,0,35,0,37,1,No explanation
+NUM_SEC_0048,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,A car travels at a constant speed of 43 km/h. How far will it travel in 3 hours?,109,0,129,1,159,0,144,0,No explanation
+NUM_SEC_0049,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,An item priced at £120 is on sale with a 10% discount. What is the sale price?,108,1,115,0,110,0,118,0,No explanation
+NUM_SEC_0050,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,"The test scores of three students are 27, 42, and 18. What is their average score?",31,0,29,1,28,0,30.5,0,No explanation
+NUM_SEC_0051,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,Simplify the expression: (49 x 7) - 56 + 49,348,0,336,1,341,0,326,0,No explanation
+NUM_SEC_0052,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,"Find the next number in the series: 7, 11, 15, 19, 23, ?",32,0,27,1,31,0,25,0,No explanation
+NUM_SEC_0053,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,A car travels at a constant speed of 59 km/h. How far will it travel in 6 hours?,334,0,369,0,354,1,384,0,No explanation
+NUM_SEC_0054,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,An item priced at £250 is on sale with a 10% discount. What is the sale price?,240,0,229,0,235,0,225,1,No explanation
+NUM_SEC_0055,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,"The test scores of three students are 24, 41, and 17. What is their average score?",27.3,1,26.3,0,29.3,0,28.8,0,No explanation
+NUM_SEC_0056,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,Simplify the expression: (20 x 19) - 190 + 20,215,0,210,1,222,0,200,0,No explanation
+NUM_SEC_0057,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,"Find the next number in the series: 10, 15, 20, 25, 30, ?",33,0,40,0,45,0,35,1,No explanation
+NUM_SEC_0058,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,A car travels at a constant speed of 47 km/h. How far will it travel in 3 hours?,141,1,171,0,156,0,121,0,No explanation
+NUM_SEC_0059,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,An item priced at £300 is on sale with a 15% discount. What is the sale price?,255,1,285,0,265,0,270,0,No explanation
+NUM_SEC_0060,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,"The test scores of three students are 36, 45, and 23. What is their average score?",33.7,0,36.2,0,36.7,0,34.7,1,No explanation
+NUM_SEC_0061,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,Simplify the expression: (27 x 6) - 12 + 27,189,0,182,0,177,1,167,0,No explanation
+NUM_SEC_0062,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,"Find the next number in the series: 4, 10, 16, 22, 28, ?",40,0,34,1,32,0,39,0,No explanation
+NUM_SEC_0063,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,A car travels at a constant speed of 47 km/h. How far will it travel in 3 hours?,156,0,141,1,171,0,121,0,No explanation
+NUM_SEC_0064,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,An item priced at £200 is on sale with a 15% discount. What is the sale price?,180,0,185,0,175,0,170,1,No explanation
+NUM_SEC_0065,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,"The test scores of three students are 31, 31, and 26. What is their average score?",31.3,0,29.3,1,28.3,0,30.8,0,No explanation
+NUM_SEC_0066,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,Simplify the expression: (16 x 16) - 160 + 16,117,0,112,1,102,0,124,0,No explanation
+NUM_SEC_0067,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,"Find the next number in the series: 5, 9, 13, 17, 21, ?",23,0,25,1,30,0,29,0,No explanation
+NUM_SEC_0068,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,A car travels at a constant speed of 51 km/h. How far will it travel in 5 hours?,235,0,255,1,285,0,270,0,No explanation
+NUM_SEC_0069,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,An item priced at £200 is on sale with a 15% discount. What is the sale price?,180,0,170,1,185,0,175,0,No explanation
+NUM_SEC_0070,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,"The test scores of three students are 27, 36, and 29. What is their average score?",32.7,0,30.7,1,32.2,0,29.7,0,No explanation
+NUM_SEC_0071,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,Simplify the expression: (24 x 5) - 25 + 24,119,1,109,0,124,0,131,0,No explanation
+NUM_SEC_0072,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,"Find the next number in the series: 3, 8, 13, 18, 23, ?",28,1,33,0,30,0,26,0,No explanation
+NUM_SEC_0073,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,A car travels at a constant speed of 74 km/h. How far will it travel in 5 hours?,400,0,350,0,385,0,370,1,No explanation
+NUM_SEC_0074,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,An item priced at £150 is on sale with a 20% discount. What is the sale price?,123,0,130,0,135,0,120,1,No explanation
+NUM_SEC_0075,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,"The test scores of three students are 31, 40, and 28. What is their average score?",32,0,35,0,34.5,0,33,1,No explanation
+NUM_SEC_0076,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,Simplify the expression: (26 x 6) - 48 + 26,139,0,146,0,124,0,134,1,No explanation
+NUM_SEC_0077,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,"Find the next number in the series: 7, 13, 19, 25, 31, ?",42,0,43,0,35,0,37,1,No explanation
+NUM_SEC_0078,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,A car travels at a constant speed of 79 km/h. How far will it travel in 5 hours?,410,0,375,0,425,0,395,1,No explanation
+NUM_SEC_0079,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,An item priced at £300 is on sale with a 20% discount. What is the sale price?,240,1,250,0,280,0,270,0,No explanation
+NUM_SEC_0080,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,"The test scores of three students are 29, 47, and 19. What is their average score?",31.7,1,30.7,0,33.7,0,33.2,0,No explanation
+NUM_SEC_0081,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,Simplify the expression: (21 x 14) - 112 + 21,215,0,193,0,208,0,203,1,No explanation
+NUM_SEC_0082,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,"Find the next number in the series: 5, 11, 17, 23, 29, ?",35,1,40,0,41,0,33,0,No explanation
+NUM_SEC_0083,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,A car travels at a constant speed of 68 km/h. How far will it travel in 4 hours?,252,0,272,1,302,0,287,0,No explanation
+NUM_SEC_0084,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,An item priced at £120 is on sale with a 20% discount. What is the sale price?,108,0,100,0,96,1,106,0,No explanation
+NUM_SEC_0085,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,"The test scores of three students are 29, 37, and 21. What is their average score?",31,0,28,0,29,1,30.5,0,No explanation
+NUM_SEC_0086,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,Simplify the expression: (25 x 20) - 60 + 25,455,0,465,1,470,0,477,0,No explanation
+NUM_SEC_0087,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,"Find the next number in the series: 8, 14, 20, 26, 32, ?",44,0,36,0,38,1,43,0,No explanation
+NUM_SEC_0088,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,A car travels at a constant speed of 40 km/h. How far will it travel in 3 hours?,100,0,150,0,120,1,135,0,No explanation
+NUM_SEC_0089,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,An item priced at £300 is on sale with a 25% discount. What is the sale price?,275,0,235,0,270,0,225,1,No explanation
+NUM_SEC_0090,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,"The test scores of three students are 23, 44, and 19. What is their average score?",28.7,1,30.2,0,27.7,0,30.7,0,No explanation
+NUM_SEC_0091,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,Simplify the expression: (38 x 18) - 180 + 38,532,0,547,0,542,1,554,0,No explanation
+NUM_SEC_0092,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,"Find the next number in the series: 9, 14, 19, 24, 29, ?",34,1,39,0,32,0,36,0,No explanation
+NUM_SEC_0093,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,A car travels at a constant speed of 73 km/h. How far will it travel in 6 hours?,438,1,468,0,453,0,418,0,No explanation
+NUM_SEC_0094,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,An item priced at £120 is on sale with a 20% discount. What is the sale price?,96,1,106,0,100,0,108,0,No explanation
+NUM_SEC_0095,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,"The test scores of three students are 30, 47, and 17. What is their average score?",33.3,0,30.3,0,31.3,1,32.8,0,No explanation
+NUM_SEC_0096,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,Simplify the expression: (34 x 9) - 45 + 34,307,0,285,0,300,0,295,1,No explanation
+NUM_SEC_0097,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,"Find the next number in the series: 7, 14, 21, 28, 35, ?",40,0,42,1,49,0,47,0,No explanation
+NUM_SEC_0098,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Medium,en,A car travels at a constant speed of 53 km/h. How far will it travel in 6 hours?,298,0,318,1,348,0,333,0,No explanation
+NUM_SEC_0099,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Hard,en,An item priced at £300 is on sale with a 25% discount. What is the sale price?,270,0,275,0,225,1,235,0,No explanation
+NUM_SEC_0100,Numerical Reasoning,Intermediate,SINGLE_CHOICE,secondary,Easy,en,"The test scores of three students are 29, 42, and 28. What is their average score?",32,0,33,1,35,0,34.5,0,No explanation
